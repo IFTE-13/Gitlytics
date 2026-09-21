@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Star, GitFork, Code, TrendingUp, Calendar, Flame } from "lucide-react";
+import { Star, GitFork, Code2, Clock, Zap, Layers } from "lucide-react";
+import { motion } from "motion/react";
 import type { GitHubRepo, Language } from "@/lib/types";
 
 interface InsightsPanelProps {
@@ -13,87 +13,180 @@ export function InsightsPanel({ repos, languages }: InsightsPanelProps) {
   const totalStars = repos.reduce((sum, r) => sum + r.stars, 0);
   const totalForks = repos.reduce((sum, r) => sum + r.forks, 0);
   const avgStars = repos.length > 0 ? (totalStars / repos.length).toFixed(1) : "0";
-  const topLanguage = languages.length > 0 ? languages[0].name : "—";
+  const topLanguage = languages.length > 0 ? languages[0].name : "None";
 
-  // Most recently updated repo
+  // Recency calculation
   const sortedByDate = [...repos].sort(
     (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
   );
   const recentRepo = sortedByDate[0];
+  
+  let daysSinceUpdate = 0;
+  if (recentRepo) {
+    const diffTime = Math.abs(Date.now() - new Date(recentRepo.updated_at).getTime());
+    daysSinceUpdate = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  }
 
-  // Unique languages count
-  const uniqueLangs = new Set(repos.map((r) => r.language).filter(Boolean)).size;
+  const uniqueLanguagesCount = new Set(repos.map((r) => r.language).filter(Boolean)).size;
 
-  const insights = [
-    {
-      label: "Total Stars Received",
-      value: totalStars.toLocaleString(),
-      icon: Star,
-      color: "text-amber-400 border-amber-500/25 bg-amber-500/10",
-    },
-    {
-      label: "Total Fork Count",
-      value: totalForks.toLocaleString(),
-      icon: GitFork,
-      color: "text-cyan-400 border-cyan-500/25 bg-cyan-500/10",
-    },
-    {
-      label: "Average Stars/Repo",
-      value: avgStars,
-      icon: TrendingUp,
-      color: "text-emerald-400 border-emerald-500/25 bg-emerald-500/10",
-    },
-    {
-      label: "Primary Language",
-      value: topLanguage,
-      icon: Code,
-      color: "text-purple-400 border-purple-500/25 bg-purple-500/10",
-    },
-    {
-      label: "Languages Mastered",
-      value: uniqueLangs.toString(),
-      icon: Flame,
-      color: "text-rose-400 border-rose-500/25 bg-rose-500/10",
-    },
-    {
-      label: "Last Repository Sync",
-      value: recentRepo
-        ? new Date(recentRepo.updated_at).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        })
-        : "—",
-      icon: Calendar,
-      color: "text-blue-400 border-blue-500/25 bg-blue-500/10",
-    },
-  ];
+  // Star-to-fork community ratio
+  const starToForkRatio = totalForks > 0 ? (totalStars / totalForks).toFixed(1) : totalStars > 0 ? "∞" : "0.0";
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
-      <h3 className="text-xl font-bold tracking-tight text-foreground mb-4 font-display">
-        Developer Insights
-      </h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        {insights.map((item) => (
-          <Card
-            key={item.label}
-            className="border-border/40 bg-card/40 backdrop-blur-xs cyber-glow hover:bg-card/75 transition-all duration-300 group"
-          >
-            <CardContent className="p-5 flex flex-col items-center text-center">
-              {/* Premium Icon Badge */}
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl border ${item.color} shrink-0 mb-3.5 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
-                <item.icon className="h-5 w-5" />
-              </div>
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-1 h-8 font-sans">
-                {item.label}
-              </p>
-              <p className="text-2xl font-extrabold text-foreground font-display tabular-nums tracking-tight">
-                {item.value}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4"
+    >
+      {/* Section Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
+        <div className="flex items-center gap-2">
+          <div className="flex h-5 w-5 items-center justify-center rounded bg-primary/10 text-primary">
+            <Zap className="h-3 w-3" />
+          </div>
+          <h3 className="font-display font-bold text-base text-foreground tracking-tight">
+            Developer Velocity & Archival Telemetry
+          </h3>
+        </div>
+        <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest hidden sm:inline">
+          {repos.length} Repositories Indexed
+        </span>
       </div>
-    </div>
+
+      {/* Asymmetrical Intelligence Grid with Staggered Motion */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        {/* Metric 1: Star Gravity */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          whileHover={{ y: -2 }}
+          className="surface-panel-interactive p-5 rounded-lg border border-border bg-card flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between text-muted-foreground font-mono text-xs">
+              <span className="uppercase tracking-wider">Star Gravity</span>
+              <Star className="h-3.5 w-3.5 text-amber-500" />
+            </div>
+            <div className="mt-3">
+              <div className="text-3xl sm:text-4xl font-extrabold font-mono text-foreground tracking-tight tabular-nums">
+                {totalStars.toLocaleString()}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 font-sans">
+                Accumulated across public repositories
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px] font-mono">
+            <span className="text-muted-foreground">AVG PER REPO</span>
+            <span className="font-semibold text-foreground">{avgStars} ★</span>
+          </div>
+        </motion.div>
+
+        {/* Metric 2: Fork Leverage */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.18 }}
+          whileHover={{ y: -2 }}
+          className="surface-panel-interactive p-5 rounded-lg border border-border bg-card flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between text-muted-foreground font-mono text-xs">
+              <span className="uppercase tracking-wider">Network Forks</span>
+              <GitFork className="h-3.5 w-3.5 text-sky-500" />
+            </div>
+            <div className="mt-3">
+              <div className="text-3xl sm:text-4xl font-extrabold font-mono text-foreground tracking-tight tabular-nums">
+                {totalForks.toLocaleString()}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 font-sans">
+                Community downstream branches & clones
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px] font-mono">
+            <span className="text-muted-foreground">STAR/FORK RATIO</span>
+            <span className="font-semibold text-foreground">{starToForkRatio}x</span>
+          </div>
+        </motion.div>
+
+        {/* Metric 3: Linguistic Breadth */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.26 }}
+          whileHover={{ y: -2 }}
+          className="surface-panel-interactive p-5 rounded-lg border border-border bg-card flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between text-muted-foreground font-mono text-xs">
+              <span className="uppercase tracking-wider">Language Breadth</span>
+              <Layers className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <div className="mt-3">
+              <div className="text-3xl sm:text-4xl font-extrabold font-mono text-foreground tracking-tight tabular-nums">
+                {uniqueLanguagesCount}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 font-sans">
+                Primary anchor: <span className="font-semibold text-foreground">{topLanguage}</span>
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px] font-mono">
+            <span className="text-muted-foreground">DIVERSITY RATING</span>
+            <span className="font-semibold text-foreground">
+              {uniqueLanguagesCount >= 8
+                ? "Polyglot"
+                : uniqueLanguagesCount >= 4
+                ? "Multifaceted"
+                : "Specialized"}
+            </span>
+          </div>
+        </motion.div>
+
+        {/* Metric 4: Cadence & Recency */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.34 }}
+          whileHover={{ y: -2 }}
+          className="surface-panel-interactive p-5 rounded-lg border border-border bg-card flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between text-muted-foreground font-mono text-xs">
+              <span className="uppercase tracking-wider">Cadence Recency</span>
+              <Clock className="h-3.5 w-3.5 text-emerald-500" />
+            </div>
+            <div className="mt-3">
+              <div className="text-3xl sm:text-4xl font-extrabold font-mono text-foreground tracking-tight tabular-nums">
+                {daysSinceUpdate === 0 ? "Today" : `${daysSinceUpdate}d`}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 font-sans truncate">
+                Latest: <span className="font-semibold text-foreground">{recentRepo?.name || "None"}</span>
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px] font-mono">
+            <span className="text-muted-foreground">STATUS</span>
+            <span className={`font-semibold flex items-center gap-1.5 ${
+              daysSinceUpdate <= 14
+                ? "text-emerald-500"
+                : daysSinceUpdate <= 60
+                ? "text-amber-500"
+                : "text-muted-foreground"
+            }`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${
+                daysSinceUpdate <= 14 ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+              }`} />
+              {daysSinceUpdate <= 14 ? "High Activity" : daysSinceUpdate <= 60 ? "Steady" : "Archival"}
+            </span>
+          </div>
+        </motion.div>
+
+      </div>
+    </motion.div>
   );
 }

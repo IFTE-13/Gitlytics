@@ -1,24 +1,25 @@
 "use client";
 
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 import {
   Github,
   Twitter,
   Building,
   MapPin,
-  BookOpen,
-  Users,
-  UserPlus,
   Calendar,
-  AlertCircle,
+  AlertTriangle,
+  ExternalLink,
+  ShieldCheck,
+  Award,
 } from "lucide-react";
-import Link from "next/link";
-import type { GitHubUser } from "@/lib/types";
+import { motion } from "motion/react";
+import type { GitHubUser, GitHubRepo } from "@/lib/types";
 
 interface UserProfileProps {
   userData: GitHubUser | null;
   error: string | null;
+  repos?: GitHubRepo[];
 }
 
 function getAccountAge(createdAt: string): string {
@@ -29,172 +30,275 @@ function getAccountAge(createdAt: string): string {
   const totalMonths = years * 12 + months;
 
   if (totalMonths < 1) return "Joined this month";
-  if (totalMonths < 12) return `Member for ${totalMonths} mo${totalMonths > 1 ? "s" : ""}`;
+  if (totalMonths < 12) return `${totalMonths} month${totalMonths > 1 ? "s" : ""}`;
   const yrs = Math.floor(totalMonths / 12);
   const mos = totalMonths % 12;
-  if (mos === 0) return `Member for ${yrs} yr${yrs > 1 ? "s" : ""}`;
-  return `Member for ${yrs} yr${yrs > 1 ? "s" : ""} ${mos} mo${mos > 1 ? "s" : ""}`;
+  if (mos === 0) return `${yrs} year${yrs > 1 ? "s" : ""}`;
+  return `${yrs} yr${yrs > 1 ? "s" : ""}, ${mos} mo${mos > 1 ? "s" : ""}`;
 }
 
-export function UserProfile({ userData, error }: UserProfileProps) {
+function computeDeveloperArchetype(userData: GitHubUser, repos?: GitHubRepo[]): {
+  title: string;
+  badge: string;
+  description: string;
+} {
+  const totalStars = repos?.reduce((sum, r) => sum + r.stars, 0) || 0;
+  const languages = repos?.map((r) => r.language).filter(Boolean) as string[] || [];
+  const langCounts: Record<string, number> = {};
+  languages.forEach((l) => (langCounts[l] = (langCounts[l] || 0) + 1));
+
+  const hasSystems = ["Rust", "C", "C++", "Go", "Zig"].some((l) => (langCounts[l] || 0) > 1);
+  const hasWeb = ["TypeScript", "JavaScript", "HTML", "CSS"].some((l) => (langCounts[l] || 0) > 2);
+  const hasData = ["Python", "Jupyter Notebook", "R", "Julia"].some((l) => (langCounts[l] || 0) > 1);
+
+  if (userData.followers > 5000 || totalStars > 5000) {
+    return {
+      title: "Open-Source Luminary",
+      badge: "TIER 01 // PILLAR",
+      description: "High ecosystem gravity with expansive community adoption and star reach.",
+    };
+  }
+
+  if (hasSystems && hasWeb) {
+    return {
+      title: "Polyglot Systems Engineer",
+      badge: "FULL-SPECTRUM // COMPILED & WEB",
+      description: "Bridges low-level systems architectures with modern application runtimes.",
+    };
+  }
+
+  if (hasSystems) {
+    return {
+      title: "Systems & Infrastructure Architect",
+      badge: "LOW-LEVEL // HIGH-PERFORMANCE",
+      description: "Focuses on compiled performance, bare-metal efficiency, and core protocols.",
+    };
+  }
+
+  if (hasData) {
+    return {
+      title: "Machine Intelligence & Analytics Lead",
+      badge: "DATA // ALGORITHMIC",
+      description: "Specializes in mathematical computing, machine learning pipelines, and research models.",
+    };
+  }
+
+  if (userData.public_repos > 30) {
+    return {
+      title: "Prolific Codebase Creator",
+      badge: "ACTIVE FOUNDER // HIGH VELOCITY",
+      description: "Maintains an expansive portfolio of public software repositories and tools.",
+    };
+  }
+
+  return {
+    title: "Software Craftsman",
+    badge: "ENGINEERING PRACTITIONER",
+    description: "Builds focused, production-grade applications with clean version control discipline.",
+  };
+}
+
+export function UserProfile({ userData, error, repos }: UserProfileProps) {
   if (error) {
     return (
-      <div className="w-full max-w-6xl mx-auto px-4 animate-fade-in-up">
-        <Card className="border-destructive/30 bg-destructive/5 cyber-glow">
-          <CardContent className="flex items-center gap-3.5 py-5 px-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10 text-destructive shrink-0">
-              <AlertCircle className="h-5 w-5" />
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6"
+      >
+        <div className="surface-panel border-destructive/40 bg-destructive/5 p-6 rounded-lg">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded bg-destructive/10 text-destructive shrink-0">
+              <AlertTriangle className="h-5 w-5" />
             </div>
-            <div>
-              <h4 className="text-sm font-semibold text-destructive font-display">Analysis Error</h4>
-              <p className="text-destructive/80 text-xs mt-0.5 font-sans">{error}</p>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-destructive font-display">
+                Profile Telemetry Query Failed
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground font-sans max-w-xl">
+                {error}. Verify that the GitHub handle exists and has public activity, or check if the GitHub REST API hourly rate limit has been exceeded.
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
+      </motion.div>
     );
   }
 
-  if (!userData) {
-    return null;
-  }
+  if (!userData) return null;
 
-  const stats = [
-    { title: "Public Repositories", value: userData.public_repos, icon: BookOpen, color: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
-    { title: "Total Followers", value: userData.followers, icon: Users, color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
-    { title: "Total Following", value: userData.following, icon: UserPlus, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
-  ];
-
-  const profileDetails = [
-    {
-      label: "GitHub Link",
-      value: `@${userData.login}`,
-      icon: Github,
-      href: userData.html_url,
-    },
-    {
-      label: "Twitter / X",
-      value: userData.twitter_username ? `@${userData.twitter_username}` : null,
-      icon: Twitter,
-      href: userData.twitter_username
-        ? `https://twitter.com/${userData.twitter_username}`
-        : null,
-    },
-    {
-      label: "Organization",
-      value: userData.company,
-      icon: Building,
-    },
-    {
-      label: "Location Address",
-      value: userData.location,
-      icon: MapPin,
-    },
-    {
-      label: "Tenure Period",
-      value: userData.created_at ? getAccountAge(userData.created_at) : null,
-      icon: Calendar,
-    },
-  ].filter((detail) => detail.value);
+  const archetype = computeDeveloperArchetype(userData, repos);
+  const accountAge = getAccountAge(userData.created_at);
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 space-y-5 animate-fade-in-up">
-      {/* Profile Card */}
-      <Card className="overflow-hidden border-border/50 bg-card/60 backdrop-blur-md cyber-glow">
-        <CardContent className="p-6 sm:p-8">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-            {/* Avatar & Identity info */}
-            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5 sm:gap-6 flex-1 min-w-0">
-              <div className="relative shrink-0">
-                <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-primary to-cyan-400 opacity-60 blur-md animate-pulse-soft" />
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4"
+    >
+      {/* Editorial Developer Dossier */}
+      <div className="surface-panel rounded-lg border border-border bg-card overflow-hidden shadow-xs">
+        {/* Dossier Masthead Bar */}
+        <div className="border-b border-border bg-secondary/40 px-6 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="font-semibold text-foreground">DOSSIER // @{userData.login}</span>
+          </div>
+          <div className="flex items-center gap-3 text-[11px]">
+            <span>MEMBER SINCE {new Date(userData.created_at).getFullYear()}</span>
+            <span>·</span>
+            <span className="text-primary font-medium">{archetype.badge}</span>
+          </div>
+        </div>
+
+        {/* Core Dossier Body */}
+        <div className="p-6 sm:p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {/* Identity & Bio */}
+            <div className="lg:col-span-7 flex flex-col sm:flex-row items-start gap-6">
+              {/* Hairline Avatar with motion hover */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+                className="relative shrink-0"
+              >
                 <Image
                   src={userData.avatar_url}
-                  alt={`${userData.login}'s avatar`}
-                  width={96}
-                  height={96}
-                  className="relative rounded-full border-2 border-background shadow-xl scale-95"
+                  alt={`${userData.login}'s GitHub avatar`}
+                  width={104}
+                  height={104}
+                  className="rounded-lg border-2 border-border bg-secondary object-cover shadow-sm"
+                  priority
                 />
-              </div>
-              <div className="space-y-2 min-w-0">
+              </motion.div>
+
+              <div className="space-y-3 flex-1 min-w-0">
                 <div>
-                  <h2 className="text-3xl font-extrabold text-foreground tracking-tight font-display">
-                    {userData.name || userData.login}
-                  </h2>
-                  {userData.name && (
-                    <p className="text-sm font-medium text-primary mt-0.5 font-display">
-                      @{userData.login}
-                    </p>
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight font-display">
+                      {userData.name || userData.login}
+                    </h2>
+                    <Link
+                      href={userData.html_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono text-muted-foreground bg-secondary hover:text-foreground hover:bg-border transition-colors"
+                      title="Open profile on GitHub"
+                    >
+                      <span>@{userData.login}</span>
+                      <ExternalLink className="h-3 w-3 opacity-70" />
+                    </Link>
+                  </div>
+
+                  {/* Archetype summary banner */}
+                  <div className="mt-1 text-xs font-mono text-primary font-semibold flex items-center gap-1.5">
+                    <Award className="h-3.5 w-3.5" />
+                    <span>{archetype.title}</span>
+                  </div>
+                </div>
+
+                <p className="text-sm text-muted-foreground leading-relaxed font-sans max-w-xl">
+                  {userData.bio || "No public biographical description filed on this developer profile."}
+                </p>
+
+                {/* Metadata row */}
+                <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-muted-foreground pt-1">
+                  {userData.location && (
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-muted-foreground/70" />
+                      <span>{userData.location}</span>
+                    </div>
+                  )}
+                  {userData.company && (
+                    <div className="flex items-center gap-1.5">
+                      <Building className="h-3.5 w-3.5 text-muted-foreground/70" />
+                      <span>{userData.company}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
+                    <span>{accountAge} tenure</span>
+                  </div>
+                  {userData.twitter_username && (
+                    <Link
+                      href={`https://twitter.com/${userData.twitter_username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 hover:text-foreground transition-colors"
+                    >
+                      <Twitter className="h-3.5 w-3.5 text-muted-foreground/70" />
+                      <span>@{userData.twitter_username}</span>
+                    </Link>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-md font-sans">
-                  {userData.bio || "No bio available for this developer profile."}
-                </p>
               </div>
             </div>
 
-            {/* Profile Detail Grid */}
-            {profileDetails.length > 0 && (
-              <div className="w-full md:w-auto shrink-0 md:max-w-xs border-t md:border-t-0 md:border-l border-border/30 pt-6 md:pt-0 md:pl-8">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 text-center md:text-left font-display">
-                  Profile Details
-                </h4>
-                <div className="space-y-3 font-sans">
-                  {profileDetails.map((detail) => (
-                    <div
-                      key={detail.label}
-                      className="flex items-center gap-3 text-sm justify-start"
-                    >
-                      {/* Styled Mini Icon */}
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-border/40 bg-secondary/50 text-muted-foreground shrink-0 shadow-xs">
-                        <detail.icon className="h-3.5 w-3.5" />
-                      </div>
-                      {detail.href ? (
-                        <Link
-                          href={detail.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:text-primary-foreground hover:bg-primary/10 px-2 py-0.5 rounded-md font-semibold transition-all truncate"
-                        >
-                          {detail.value}
-                        </Link>
-                      ) : (
-                        <span className="text-foreground font-semibold truncate px-2">
-                          {detail.value}
-                        </span>
-                      )}
-                    </div>
-                  ))}
+            {/* Right: Architectural Telemetry Numbers with Staggered Entrance */}
+            <div className="lg:col-span-5 grid grid-cols-3 gap-3 border-t lg:border-t-0 lg:border-l border-border pt-6 lg:pt-0 lg:pl-8">
+              {/* Stat 1: Repos */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                whileHover={{ y: -2 }}
+                className="p-3.5 rounded bg-secondary/40 border border-border flex flex-col justify-between transition-all"
+              >
+                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  Public Repos
+                </span>
+                <div className="mt-2">
+                  <div className="text-2xl sm:text-3xl font-bold font-mono text-foreground tabular-nums">
+                    {userData.public_repos.toLocaleString()}
+                  </div>
+                  <span className="text-[10px] font-mono text-muted-foreground">Analyzed</span>
                 </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              </motion.div>
 
-      {/* Stats Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {stats.map((stat) => (
-          <Card
-            key={stat.title}
-            className="border-border/40 bg-card/40 backdrop-blur-xs cyber-glow hover:bg-card/75 transition-all duration-300 group"
-          >
-            <CardContent className="p-5 flex items-center justify-between">
-              <div className="space-y-1.5 min-w-0">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest font-display">
-                  {stat.title}
-                </p>
-                <p className="text-3xl font-extrabold text-foreground font-display tabular-nums group-hover:scale-105 transition-transform origin-left">
-                  {stat.value.toLocaleString()}
-                </p>
-              </div>
-              {/* Premium Icon badge */}
-              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${stat.color} shrink-0 shadow-md group-hover:rotate-6 transition-transform`}>
-                <stat.icon className="h-5 w-5" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              {/* Stat 2: Followers */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.18 }}
+                whileHover={{ y: -2 }}
+                className="p-3.5 rounded bg-secondary/40 border border-border flex flex-col justify-between transition-all"
+              >
+                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  Followers
+                </span>
+                <div className="mt-2">
+                  <div className="text-2xl sm:text-3xl font-bold font-mono text-foreground tabular-nums">
+                    {userData.followers.toLocaleString()}
+                  </div>
+                  <span className="text-[10px] font-mono text-muted-foreground">Subscribers</span>
+                </div>
+              </motion.div>
+
+              {/* Stat 3: Following */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.26 }}
+                whileHover={{ y: -2 }}
+                className="p-3.5 rounded bg-secondary/40 border border-border flex flex-col justify-between transition-all"
+              >
+                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  Following
+                </span>
+                <div className="mt-2">
+                  <div className="text-2xl sm:text-3xl font-bold font-mono text-foreground tabular-nums">
+                    {userData.following.toLocaleString()}
+                  </div>
+                  <span className="text-[10px] font-mono text-muted-foreground">Network</span>
+                </div>
+              </motion.div>
+            </div>
+
+          </div>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
