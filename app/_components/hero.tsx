@@ -242,9 +242,9 @@ export function Header({
               </div>
 
               {/* Monospace telemetry footer */}
-              <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[10px] font-mono text-muted-foreground">
-                <span>RATE LIMIT BUDGET: 60/HR</span>
-                <span className="text-primary font-medium">100% RAW GROUND TRUTH</span>
+              <div className="mt-4 pt-3 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-[10px] font-mono text-muted-foreground">
+                <span>RATE LIMIT: 60/HR (PUBLIC API)</span>
+                <span className="text-amber-500 font-medium">PRIVATE CONTRIBUTIONS EXCLUDED</span>
               </div>
             </div>
           </motion.div>
