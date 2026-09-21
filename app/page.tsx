@@ -3,10 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { Header } from "@/app/_components/hero";
 import { UserProfile } from "@/app/_components/userProfile";
+import { GitcardSection } from "@/app/_components/gitcard-section";
 import { RepoList } from "@/app/_components/repoList";
 import { LanguageChart } from "@/app/_components/languageChart";
 import { InsightsPanel } from "@/app/_components/insightsPanel";
 import { TopRepos } from "@/app/_components/topRepos";
+import { TrendingRepos } from "@/app/_components/trendingRepos";
 import { AnalysisLoading } from "@/app/_components/analysis-loading";
 import type { GitHubUser, GitHubRepo, Language } from "@/lib/types";
 
@@ -93,8 +95,8 @@ export default function Home() {
   }, [executeSearch]);
 
   return (
-    <main className="min-h-screen bg-background text-foreground pb-24">
-      {/* Hero & Command Input Deck */}
+    <main className="min-h-screen bg-background text-foreground">
+      {/* Hero & FlowForge-Style Operational Command Deck */}
       <Header
         username={username}
         setUsername={setUsername}
@@ -112,7 +114,6 @@ export default function Home() {
       {!isLoading && (
         <div className="space-y-4">
           {/* User Profile Dossier (or Error State) */}
-          {/* User Profile Dossier (or Error State) */}
           <UserProfile
             userData={userData}
             error={error}
@@ -120,9 +121,16 @@ export default function Home() {
             languages={languages}
           />
 
-          {/* Render Analytics only when profile & repository data are available */}
+          {/* Render Analytics & Gitcard only when profile & repository data are available */}
           {userData && repos.length > 0 && (
             <>
+              {/* In-Page Gitcard Generator Section */}
+              <GitcardSection
+                userData={userData}
+                repos={repos}
+                languages={languages}
+              />
+
               {/* Core Velocity & Archival Telemetry Grid */}
               <InsightsPanel repos={repos} languages={languages} />
 
@@ -148,6 +156,9 @@ export default function Home() {
               />
             </>
           )}
+
+          {/* Global Radar: Trending & Flagship Repositories */}
+          <TrendingRepos onSelectMaintainer={handleSelectSuggested} />
         </div>
       )}
 

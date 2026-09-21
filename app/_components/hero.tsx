@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useRef, FormEvent } from "react";
-import { Search, ArrowRight, CornerDownLeft, Sparkles, Terminal } from "lucide-react";
+import { useEffect, useRef, useState, FormEvent } from "react";
+import {
+  ArrowRight,
+  CornerDownLeft,
+  Terminal,
+  Settings2,
+  Sliders,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
 import { motion } from "motion/react";
-import { HeroNetworkCanvas } from "./hero-network-canvas";
+import { HeroParticleSphere } from "./hero-particle-sphere";
 
 interface HeaderProps {
   username: string;
@@ -14,12 +22,20 @@ interface HeaderProps {
 }
 
 const FEATURED_DEVELOPERS = [
-  { handle: "torvalds", label: "Linus Torvalds", role: "Kernel Architect" },
-  { handle: "shadcn", label: "shadcn", role: "UI Systems" },
-  { handle: "leerob", label: "Lee Robinson", role: "DX Lead" },
-  { handle: "sindresorhus", label: "Sindre Sorhus", role: "OSS Pillar" },
-  { handle: "gaearon", label: "Dan Abramov", role: "React Core" },
-  { handle: "octocat", label: "The Octocat", role: "GitHub Mascot" },
+  { handle: "torvalds", label: "Linus Torvalds" },
+  { handle: "shadcn", label: "shadcn" },
+  { handle: "leerob", label: "Lee Robinson" },
+  { handle: "antfu", label: "Anthony Fu" },
+  { handle: "sindresorhus", label: "Sindre Sorhus" },
+  { handle: "gaearon", label: "Dan Abramov" },
+];
+
+const ACCENT_PRESETS = [
+  { id: "iris", color: "#6366f1", label: "Iris" },
+  { id: "amber", color: "#f59e0b", label: "Amber" },
+  { id: "cobalt", color: "#38bdf8", label: "Cobalt" },
+  { id: "emerald", color: "#10b981", label: "Emerald" },
+  { id: "vermilion", color: "#f43f5e", label: "Vermilion" },
 ];
 
 export function Header({
@@ -30,6 +46,30 @@ export function Header({
   onSelectSuggested,
 }: HeaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // System Calibration States
+  const [fluxDynamics, setFluxDynamics] = useState(0.6);
+  const [processingThreads, setProcessingThreads] = useState(0.9);
+  const [density, setDensity] = useState(0.8);
+  const [activeAccent, setActiveAccent] = useState("iris");
+
+  // Read accent on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("gitlytics-accent");
+      if (saved && ACCENT_PRESETS.some((a) => a.id === saved)) {
+        setActiveAccent(saved);
+      }
+    } catch {
+      // Ignore
+    }
+  }, []);
+
+  const handleAccentPick = (accentId: string) => {
+    setActiveAccent(accentId);
+    document.documentElement.dataset.accent = accentId;
+    localStorage.setItem("gitlytics-accent", accentId);
+  };
 
   // Keyboard shortcut: pressing "/" or "Cmd+K" focuses search
   useEffect(() => {
@@ -48,61 +88,47 @@ export function Header({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const currentAccentColor =
+    ACCENT_PRESETS.find((a) => a.id === activeAccent)?.color || "#6366f1";
+
   return (
-    <section className="relative w-full border-b border-border technical-grid pt-12 pb-14 sm:pt-16 sm:pb-18 lg:pt-20 lg:pb-20 overflow-hidden">
-      {/* Animated Git Commit & Topology Network Canvas */}
-      <HeroNetworkCanvas />
+    <section className="relative w-full border-b border-border bg-background technical-grid pt-10 pb-16 lg:pt-16 lg:pb-20 overflow-hidden">
+      
+      {/* Background radial glow */}
+      <div className="absolute top-1/2 left-3/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/8 rounded-full blur-3xl pointer-events-none" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
           
-          {/* Left Column: Typographic Masthead & Command Deck */}
+          {/* LEFT COLUMN: FlowForge-Style Typography & Command Deck */}
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="lg:col-span-7 space-y-6 sm:space-y-7"
+            className="lg:col-span-6 space-y-6"
           >
-            {/* Telemetry micro-tag */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-2.5 py-1 rounded-sm border border-border bg-secondary/80 font-mono text-xs text-muted-foreground backdrop-blur-xs shadow-2xs"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              <span>GITHUB TELEMETRY & ARCHIVAL DISASSEMBLER</span>
-            </motion.div>
-
-            {/* Editorial Main Headline */}
-            <div className="space-y-2">
-              <motion.h1
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.15 }}
-                className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.08] font-display"
-              >
-                Disassemble any GitHub codebase footprint.
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.22 }}
-                className="text-base sm:text-lg text-muted-foreground max-w-2xl font-sans leading-relaxed pt-1"
-              >
-                Transform public repositories, commit cadence, and language byte gravity into an understandable, editorial developer dossier.
-              </motion.p>
+            {/* Telemetry Status Badge */}
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-sm border border-border bg-card/60 backdrop-blur-xs font-mono text-[11px] text-muted-foreground shadow-2xs">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+              <span className="tracking-widest uppercase font-semibold">
+                OPERATIONAL INTELLIGENCE
+              </span>
             </div>
 
-            {/* Command Input Deck */}
-            <motion.form
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.3 }}
-              onSubmit={onSubmit}
-              className="pt-2"
-            >
-              <div className="surface-panel-interactive p-1.5 rounded-lg border-2 border-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-xs backdrop-blur-sm">
+            {/* FlowForge High-Impact 2-Tone Headline */}
+            <div className="space-y-3">
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.04] font-display">
+                <span className="text-foreground block">Deconstruct</span>
+                <span className="text-foreground/35 block">Everything.</span>
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground font-sans leading-relaxed max-w-xl">
+                From individual commit cadence to full multi-repo architecture, we eliminate manual code profiling. Unlocking true operational developer velocity and exportable Gitcards.
+              </p>
+            </div>
+
+            {/* Command Search Deck */}
+            <form onSubmit={onSubmit} className="pt-2 space-y-2.5">
+              <div className="surface-panel-interactive p-1.5 rounded-lg border-2 border-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-xs backdrop-blur-sm bg-card/70">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center pl-3 text-muted-foreground font-mono text-xs sm:text-sm select-none shrink-0 border-r border-border pr-3">
                     <span className="text-muted-foreground/60">github.com/</span>
@@ -129,35 +155,41 @@ export function Header({
                     {isLoading ? (
                       <>
                         <span className="h-3.5 w-3.5 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
-                        <span className="hidden sm:inline">DISASSEMBLING...</span>
+                        <span className="hidden sm:inline">PROCESSING...</span>
                       </>
                     ) : (
                       <>
-                        <span>INSPECT</span>
-                        <CornerDownLeft className="h-3.5 w-3.5 opacity-80" />
+                        <span>Initialize System</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
                       </>
                     )}
                   </button>
                 </div>
               </div>
 
-              {/* Input sub-bar with shortcut reminder */}
-              <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground mt-2 px-1">
-                <span>PRESS <kbd className="px-1 py-0.5 rounded border border-border bg-secondary text-[10px]">ENTER</kbd> TO RUN QUERY</span>
-                <span className="hidden sm:inline">FOCUS WITH <kbd className="px-1 py-0.5 rounded border border-border bg-secondary text-[10px]">/</kbd> OR <kbd className="px-1 py-0.5 rounded border border-border bg-secondary text-[10px]">⌘K</kbd></span>
-              </div>
-            </motion.form>
+              {/* Engine Status & Keyboard hints */}
+              <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground px-1">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold text-[10px]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    System Online
+                  </span>
+                  <span className="text-muted-foreground/70 hidden sm:inline">
+                    // REST v3 API PROXY
+                  </span>
+                </div>
 
-            {/* Quick Benchmark Handles */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.38 }}
-              className="space-y-2 pt-2"
-            >
+                <span className="hidden sm:inline text-[10px]">
+                  PRESS <kbd className="px-1 py-0.5 rounded border border-border bg-secondary">ENTER</kbd> OR <kbd className="px-1 py-0.5 rounded border border-border bg-secondary">/</kbd>
+                </span>
+              </div>
+            </form>
+
+            {/* Quick Preset Developer Profiles */}
+            <div className="space-y-2 pt-2">
               <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <Terminal className="h-3 w-3 text-primary" />
-                <span>Preset Developer Profiles:</span>
+                <span>Benchmark Profiles:</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {FEATURED_DEVELOPERS.map((dev) => (
@@ -180,74 +212,151 @@ export function Header({
                   </button>
                 ))}
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
 
-          {/* Right Column: Live Diagnostic Specimen & Blueprint Preview */}
-          <motion.div
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.25, ease: "easeOut" }}
-            className="lg:col-span-5"
-          >
-            <div className="surface-panel p-5 sm:p-6 border border-border rounded-lg bg-card/85 backdrop-blur-md relative overflow-hidden font-mono text-xs shadow-xs">
-              {/* Top status bar */}
-              <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-primary" />
-                  <span className="font-bold text-foreground tracking-wide">INDEXING SPECS</span>
-                </div>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                  REST API v3
-                </span>
-              </div>
-
-              {/* Data Extraction Points */}
-              <div className="space-y-3 font-sans text-muted-foreground">
-                <motion.div
-                  whileHover={{ x: 2 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex items-start gap-3 p-2.5 rounded bg-secondary/40 border border-border/60"
-                >
-                  <div className="font-mono text-primary font-bold text-xs shrink-0 w-6">01</div>
-                  <div>
-                    <div className="text-foreground font-semibold text-xs">Byte-Density Distribution</div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5">Aggregates exact code volume across all public repositories with linguistic entropy analysis.</div>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ x: 2 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex items-start gap-3 p-2.5 rounded bg-secondary/40 border border-border/60"
-                >
-                  <div className="font-mono text-primary font-bold text-xs shrink-0 w-6">02</div>
-                  <div>
-                    <div className="text-foreground font-semibold text-xs">Community Stargazer Velocity</div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5">Calculates star-to-fork traction metrics and isolates flagship open-source repositories.</div>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ x: 2 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex items-start gap-3 p-2.5 rounded bg-secondary/40 border border-border/60"
-                >
-                  <div className="font-mono text-primary font-bold text-xs shrink-0 w-6">03</div>
-                  <div>
-                    <div className="text-foreground font-semibold text-xs">Developer Archetype Synthesis</div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5">Categorizes developer focus (Systems, Web, Core Infrastructure) based on verified commits.</div>
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Monospace telemetry footer */}
-              <div className="mt-4 pt-3 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-[10px] font-mono text-muted-foreground">
-                <span>RATE LIMIT: 60/HR (PUBLIC API)</span>
-                <span className="text-amber-500 font-medium">PRIVATE CONTRIBUTIONS EXCLUDED</span>
-              </div>
+            {/* FlowForge Bottom Spec Footer */}
+            <div className="pt-3 border-t border-border/70 flex flex-wrap items-center gap-x-5 gap-y-1 text-[11px] font-mono text-muted-foreground/80">
+              <span>Protocol REST v3</span>
+              <span>•</span>
+              <span>Encrypted Public Tunnel</span>
+              <span>•</span>
+              <span className="text-amber-500 font-medium">Public API Scope (Zero Private Data)</span>
             </div>
           </motion.div>
+
+          {/* RIGHT COLUMN: FlowForge 3D Particle Sphere & System Calibration HUD */}
+          <div className="lg:col-span-6 relative min-h-[460px] sm:min-h-[500px] flex items-center justify-center">
+            
+            {/* 3D Particle Sphere Canvas */}
+            <div className="w-full h-[460px] sm:h-[500px] relative flex items-center justify-center">
+              <HeroParticleSphere
+                fluxDynamics={fluxDynamics}
+                processingThreads={processingThreads}
+                density={density}
+                accentColor={currentAccentColor}
+              />
+
+              {/* FlowForge Connected Telemetry Link Box */}
+              <div className="absolute right-4 sm:right-6 bottom-28 sm:bottom-32 z-20 pointer-events-none hidden sm:flex items-center gap-3">
+                <div className="p-3 rounded-lg border border-border bg-card/90 backdrop-blur-md font-mono text-[11px] space-y-1.5 shadow-lg min-w-[150px]">
+                  <div className="flex items-center gap-1.5 font-bold text-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>WSS_Link.01</span>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Packets</span>
+                    <span className="text-foreground font-semibold">14.2k/s</span>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Latency</span>
+                    <span className="text-emerald-500 font-semibold">8ms</span>
+                  </div>
+                </div>
+
+                {/* Dashed connector line */}
+                <div className="w-8 border-t border-dashed border-border/80 relative">
+                  <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full border border-border bg-card" />
+                </div>
+              </div>
+
+              {/* FlowForge System Calibration Control HUD */}
+              <div className="absolute right-0 bottom-0 z-20 w-full max-w-[280px] p-4 rounded-xl border border-border bg-card/90 backdrop-blur-md shadow-xl font-mono text-xs space-y-3.5">
+                
+                {/* Calibration Header */}
+                <div className="flex items-center justify-between border-b border-border pb-2.5">
+                  <span className="font-bold text-foreground tracking-wide flex items-center gap-1.5">
+                    <Sliders className="h-3.5 w-3.5 text-primary" />
+                    System Calibration
+                  </span>
+                  <Settings2 className="h-3.5 w-3.5 text-muted-foreground" />
+                </div>
+
+                {/* Slider 1: Flux Dynamics */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[11px] text-muted-foreground">
+                    <span>Flux Dynamics</span>
+                    <span className="text-foreground font-bold">{fluxDynamics.toFixed(1)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.2"
+                    max="1.0"
+                    step="0.1"
+                    value={fluxDynamics}
+                    onChange={(e) => setFluxDynamics(parseFloat(e.target.value))}
+                    className="w-full h-1 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                </div>
+
+                {/* Slider 2: Processing Threads */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[11px] text-muted-foreground">
+                    <span>Processing Threads</span>
+                    <span className="text-foreground font-bold">{processingThreads.toFixed(1)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.2"
+                    max="1.0"
+                    step="0.1"
+                    value={processingThreads}
+                    onChange={(e) => setProcessingThreads(parseFloat(e.target.value))}
+                    className="w-full h-1 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                </div>
+
+                {/* Mini Sliders Row: Clock Rate & Density */}
+                <div className="grid grid-cols-2 gap-3 pt-0.5">
+                  <div className="space-y-1">
+                    <div className="text-[10px] text-muted-foreground">Clock Rate</div>
+                    <input
+                      type="range"
+                      min="0.3"
+                      max="1.0"
+                      step="0.1"
+                      defaultValue="0.7"
+                      className="w-full h-1 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-[10px] text-muted-foreground">Density</div>
+                    <input
+                      type="range"
+                      min="0.3"
+                      max="1.0"
+                      step="0.1"
+                      value={density}
+                      onChange={(e) => setDensity(parseFloat(e.target.value))}
+                      className="w-full h-1 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+                    />
+                  </div>
+                </div>
+
+                {/* Energy Profile (Theme Accent Switcher Dots) */}
+                <div className="pt-2 border-t border-border flex items-center justify-between">
+                  <span className="text-[11px] text-muted-foreground">Energy Profile</span>
+                  <div className="flex items-center gap-1.5">
+                    {ACCENT_PRESETS.map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => handleAccentPick(preset.id)}
+                        title={`Switch accent to ${preset.label}`}
+                        className={`h-3.5 w-3.5 rounded-full transition-transform cursor-pointer ${
+                          activeAccent === preset.id
+                            ? "scale-125 ring-2 ring-foreground ring-offset-1 ring-offset-card"
+                            : "opacity-70 hover:opacity-100 hover:scale-110"
+                        }`}
+                        style={{ backgroundColor: preset.color }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
 
         </div>
       </div>
