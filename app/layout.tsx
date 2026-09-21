@@ -23,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gitlytics — Developer Intelligence & Repository Analytics",
+  title: "Gitlytics",
   description:
     "An editorial developer analytics engine that translates GitHub repository activity, language gravity, and commit patterns into actionable insight.",
 };
