@@ -31,9 +31,84 @@ const LANGUAGE_COLORS: Record<string, string> = {
   Ruby: "#701516",
 };
 
+const DEFAULT_TRENDING: TrendingRepo[] = [
+  {
+    name: "ui",
+    fullName: "shadcn-ui/ui",
+    owner: "shadcn",
+    ownerAvatar: "https://avatars.githubusercontent.com/u/124599?v=4",
+    description: "A set of beautifully-designed, accessible components and a code distribution platform.",
+    stars: 84200,
+    forks: 7100,
+    language: "TypeScript",
+    url: "https://github.com/shadcn-ui/ui",
+    topics: ["react", "tailwind", "ui", "radix-ui", "components"],
+  },
+  {
+    name: "next.js",
+    fullName: "vercel/next.js",
+    owner: "vercel",
+    ownerAvatar: "https://avatars.githubusercontent.com/u/14985020?v=4",
+    description: "The React Framework for the Web. Used by some of the world's largest companies.",
+    stars: 131500,
+    forks: 27400,
+    language: "JavaScript",
+    url: "https://github.com/vercel/next.js",
+    topics: ["react", "framework", "ssr", "fullstack", "jamstack"],
+  },
+  {
+    name: "linux",
+    fullName: "torvalds/linux",
+    owner: "torvalds",
+    ownerAvatar: "https://avatars.githubusercontent.com/u/1024025?v=4",
+    description: "Linux kernel source tree maintained by Linus Torvalds.",
+    stars: 194000,
+    forks: 55600,
+    language: "C",
+    url: "https://github.com/torvalds/linux",
+    topics: ["operating-system", "kernel", "c", "systems"],
+  },
+  {
+    name: "uv",
+    fullName: "astral-sh/uv",
+    owner: "astral-sh",
+    ownerAvatar: "https://avatars.githubusercontent.com/u/115962839?v=4",
+    description: "An extremely fast Python package and project manager, written in Rust.",
+    stars: 52000,
+    forks: 2100,
+    language: "Rust",
+    url: "https://github.com/astral-sh/uv",
+    topics: ["python", "rust", "packaging", "performance"],
+  },
+  {
+    name: "bun",
+    fullName: "oven-sh/bun",
+    owner: "Jarred-Sumner",
+    ownerAvatar: "https://avatars.githubusercontent.com/u/961176?v=4",
+    description: "Incredibly fast JavaScript runtime, bundler, test runner, and package manager.",
+    stars: 77000,
+    forks: 2800,
+    language: "Zig",
+    url: "https://github.com/oven-sh/bun",
+    topics: ["javascript", "runtime", "zig", "bundler"],
+  },
+  {
+    name: "supabase",
+    fullName: "supabase/supabase",
+    owner: "kiwicopple",
+    ownerAvatar: "https://avatars.githubusercontent.com/u/8291514?v=4",
+    description: "The open source Firebase alternative. Build production apps with Postgres, Auth, and APIs.",
+    stars: 81000,
+    forks: 6900,
+    language: "TypeScript",
+    url: "https://github.com/supabase/supabase",
+    topics: ["postgres", "database", "auth", "realtime", "storage"],
+  },
+];
+
 export function TrendingRepos({ onSelectMaintainer }: TrendingReposProps) {
-  const [repos, setRepos] = useState<TrendingRepo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [repos, setRepos] = useState<TrendingRepo[]>(DEFAULT_TRENDING);
+  const [isLoading, setIsLoading] = useState(false);
   const [source, setSource] = useState<"live" | "fallback">("live");
   const [filter, setFilter] = useState<"all" | "web" | "systems">("all");
 
@@ -43,11 +118,16 @@ export function TrendingRepos({ onSelectMaintainer }: TrendingReposProps) {
       const res = await fetch("/api/github/trending");
       if (res.ok) {
         const data = await res.json();
-        setRepos(data.repos || []);
+        const reposList: TrendingRepo[] = Array.isArray(data)
+          ? data
+          : Array.isArray(data.repos)
+          ? data.repos
+          : [];
+        setRepos(reposList);
         setSource(data.source || "live");
       }
     } catch {
-      // Graceful silence, keep existing or fallback
+      // Graceful silence, keep existing
     } finally {
       setIsLoading(false);
     }
