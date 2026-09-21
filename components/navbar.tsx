@@ -21,9 +21,13 @@ export function Navbar() {
               <span className="font-display font-bold tracking-tight text-base sm:text-lg text-foreground">
                 Gitlytics
               </span>
-              <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest hidden sm:inline">
-                / v2.6
-              </span>
+              <Link
+                href="/changelog"
+                className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest hidden sm:inline hover:text-primary transition-colors bg-secondary/80 px-1.5 py-0.5 rounded border border-border/60 hover:border-primary/40"
+                title="View Gitlytics Version Timeline & Changelog"
+              >
+                v2.6
+              </Link>
             </div>
           </Link>
 

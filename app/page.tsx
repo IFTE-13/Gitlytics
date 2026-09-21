@@ -163,18 +163,27 @@ export default function Home() {
       )}
 
       {/* Editorial Telemetry Footer */}
-      <footer className="mt-20 border-t border-border pt-8 pb-12 text-xs font-mono text-muted-foreground bg-card/30">
+      <footer className="mt-20 pt-8 pb-12 text-xs font-mono text-muted-foreground bg-card/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <span className="font-bold text-foreground font-display">GITLYTICS</span>
               <span>//</span>
               <span>TELEMETRY ARCHIVE ENGINE</span>
-              <span className="text-[10px] text-primary hidden md:inline font-mono">v2.6</span>
+              <a
+                href="/changelog"
+                className="text-[10px] text-primary hover:underline hidden md:inline font-mono"
+                title="View Version Timeline & Changelog"
+              >
+                v2.6
+              </a>
             </div>
 
             {/* Legal & Help Links */}
             <div className="flex flex-wrap items-center gap-5 text-xs">
+              <a href="/changelog" className="hover:text-foreground text-primary transition-colors font-semibold">
+                Changelog (v2.6)
+              </a>
               <a href="/faq" className="hover:text-foreground transition-colors">
                 FAQ & Docs
               </a>
