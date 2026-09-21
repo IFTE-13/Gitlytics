@@ -6,260 +6,296 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-outfit);
-  --font-display: var(--font-space-grotesk);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* ========================================
-   LIGHT MODE — Premium Warm Off-White
-   ======================================== */
+/* ==========================================================================
+   BASE SYSTEM TOKENS & TYPOGRAPHY
+   ========================================================================== */
 :root {
-  --radius: 0.85rem;
-  --background: #fcfbfa;
-  --foreground: #1c1917;
+  --radius: 0.5rem;
+  --font-sans: var(--font-outfit), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-space-grotesk), sans-serif;
+  --font-mono: var(--font-mono-code), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* LIGHT MODE BASE — Crisp Architectural Paper */
+  --background: #f8f9fa;
+  --foreground: #090d16;
   --card: #ffffff;
-  --card-foreground: #1c1917;
+  --card-foreground: #090d16;
   --popover: #ffffff;
-  --popover-foreground: #1c1917;
-  --primary: #8b5cf6;
+  --popover-foreground: #090d16;
+  --secondary: #f1f3f5;
+  --secondary-foreground: #1e293b;
+  --muted: #f1f3f5;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --destructive: #e11d48;
+
+  /* Charts */
+  --chart-1: #6366f1;
+  --chart-2: #0284c7;
+  --chart-3: #d97706;
+  --chart-4: #059669;
+  --chart-5: #e11d48;
+
+  /* Default Accent: Iris */
+  --primary: #4f46e5;
   --primary-foreground: #ffffff;
-  --secondary: #f5f5f4;
-  --secondary-foreground: #292524;
-  --muted: #f5f5f4;
-  --muted-foreground: #78716c;
-  --accent: #f3e8ff;
-  --accent-foreground: #6d28d9;
-  --destructive: #ef4444;
-  --border: #e7e5e4;
-  --input: #e7e5e4;
-  --ring: #8b5cf6;
-  --chart-1: #8b5cf6;
-  --chart-2: #06b6d4;
-  --chart-3: #f59e0b;
-  --chart-4: #10b981;
-  --chart-5: #ec4899;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #1c1917;
-  --sidebar-primary: #8b5cf6;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f5f5f4;
-  --sidebar-accent-foreground: #292524;
-  --sidebar-border: #e7e5e4;
-  --sidebar-ring: #8b5cf6;
+  --accent: #eef2ff;
+  --accent-foreground: #3730a3;
+  --ring: #6366f1;
 }
 
-/* ========================================
-   DARK MODE — Cyber Obsidian & Deep Space Violet
-   ======================================== */
+/* ==========================================================================
+   DARK MODE BASE — Deep Technical Slate / Obsidian
+   ========================================================================== */
 .dark {
-  --background: #020205;
-  --foreground: #f5f3ff;
-  --card: #090915;
-  --card-foreground: #f5f3ff;
-  --popover: #090915;
-  --popover-foreground: #f5f3ff;
-  --primary: #a855f7;
-  --primary-foreground: #020205;
-  --secondary: #121226;
-  --secondary-foreground: #e9d5ff;
-  --muted: #121226;
-  --muted-foreground: #94a3b8;
-  --accent: #2e1065;
-  --accent-foreground: #f3e8ff;
-  --destructive: #f87171;
-  --border: rgba(168, 85, 247, 0.12);
-  --input: rgba(168, 85, 247, 0.15);
-  --ring: #c084fc;
-  --chart-1: #a855f7;
-  --chart-2: #22d3ee;
-  --chart-3: #facc15;
+  --background: #080b11;
+  --foreground: #f1f5f9;
+  --card: #0d121d;
+  --card-foreground: #f8fafc;
+  --popover: #0d121d;
+  --popover-foreground: #f8fafc;
+  --secondary: #141c2b;
+  --secondary-foreground: #e2e8f0;
+  --muted: #141c2b;
+  --muted-foreground: #8b9bb4;
+  --border: #1e293b;
+  --input: #1e293b;
+  --destructive: #f43f5e;
+
+  /* Charts */
+  --chart-1: #818cf8;
+  --chart-2: #38bdf8;
+  --chart-3: #fbbf24;
   --chart-4: #34d399;
-  --chart-5: #f472b6;
-  --sidebar: #090915;
-  --sidebar-foreground: #f5f3ff;
-  --sidebar-primary: #a855f7;
-  --sidebar-primary-foreground: #020205;
-  --sidebar-accent: #121226;
-  --sidebar-accent-foreground: #e9d5ff;
-  --sidebar-border: rgba(168, 85, 247, 0.12);
-  --sidebar-ring: #c084fc;
+  --chart-5: #fb7185;
+
+  /* Default Accent: Iris */
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --accent: #191c32;
+  --accent-foreground: #c7d2fe;
+  --ring: #818cf8;
 }
 
-/* ========================================
-   BASE STYLES
-   ======================================== */
+/* ==========================================================================
+   ACCENT PALETTES (Token-Based, Light + Dark Harmonized)
+   ========================================================================== */
+
+/* 1. IRIS (Default) */
+[data-accent="iris"] {
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --accent: #eef2ff;
+  --accent-foreground: #3730a3;
+  --ring: #6366f1;
+}
+.dark[data-accent="iris"],
+.dark [data-accent="iris"] {
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --accent: #191c32;
+  --accent-foreground: #c7d2fe;
+  --ring: #818cf8;
+}
+
+/* 2. AMBER (Terminal Phosphor) */
+[data-accent="amber"] {
+  --primary: #d97706;
+  --primary-foreground: #ffffff;
+  --accent: #fef3c7;
+  --accent-foreground: #92400e;
+  --ring: #f59e0b;
+}
+.dark[data-accent="amber"],
+.dark [data-accent="amber"] {
+  --primary: #f59e0b;
+  --primary-foreground: #080b11;
+  --accent: #2e1d08;
+  --accent-foreground: #fde68a;
+  --ring: #fbbf24;
+}
+
+/* 3. COBALT (Precision Telemetry) */
+[data-accent="cobalt"] {
+  --primary: #0284c7;
+  --primary-foreground: #ffffff;
+  --accent: #e0f2fe;
+  --accent-foreground: #0369a1;
+  --ring: #38bdf8;
+}
+.dark[data-accent="cobalt"],
+.dark [data-accent="cobalt"] {
+  --primary: #38bdf8;
+  --primary-foreground: #080b11;
+  --accent: #0c2338;
+  --accent-foreground: #bae6fd;
+  --ring: #7dd3fc;
+}
+
+/* 4. EMERALD (Algorithmic Botanical) */
+[data-accent="emerald"] {
+  --primary: #059669;
+  --primary-foreground: #ffffff;
+  --accent: #d1fae5;
+  --accent-foreground: #065f46;
+  --ring: #10b981;
+}
+.dark[data-accent="emerald"],
+.dark [data-accent="emerald"] {
+  --primary: #10b981;
+  --primary-foreground: #080b11;
+  --accent: #0b291d;
+  --accent-foreground: #a7f3d0;
+  --ring: #34d399;
+}
+
+/* 5. VERMILION (Swiss Editorial) */
+[data-accent="vermilion"] {
+  --primary: #e11d48;
+  --primary-foreground: #ffffff;
+  --accent: #ffe4e6;
+  --accent-foreground: #9f1239;
+  --ring: #f43f5e;
+}
+.dark[data-accent="vermilion"],
+.dark [data-accent="vermilion"] {
+  --primary: #f43f5e;
+  --primary-foreground: #ffffff;
+  --accent: #331018;
+  --accent-foreground: #fecdd3;
+  --ring: #fb7185;
+}
+
+/* ==========================================================================
+   BASE & TYPOGRAPHIC LAYER
+   ========================================================================== */
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/40;
   }
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans selection:bg-primary/20 selection:text-foreground;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-bold;
+    @apply font-display tracking-tight text-foreground;
   }
 }
 
-/* ========================================
-   CUSTOM UTILITIES & EFFECTS
-   ======================================== */
+/* ==========================================================================
+   EDITORIAL UTILITIES & ACCESSIBILITY
+   ========================================================================== */
 
-/* Glassmorphic Cyber Card Surface */
-.glass {
-  background: rgba(9, 9, 21, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(168, 85, 247, 0.12);
+/* Subtle architectural coordinate grid */
+.technical-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(120, 140, 170, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(120, 140, 170, 0.05) 1px, transparent 1px);
 }
 
-:root .glass {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(139, 92, 246, 0.15);
+.dark .technical-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
 }
 
-/* Glowing Neon Borders */
-.cyber-glow {
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
-  transition: all 0.3s ease;
-}
-.cyber-glow:hover {
-  box-shadow: 0 0 30px rgba(168, 85, 247, 0.25);
-  border-color: rgba(168, 85, 247, 0.3);
+/* Clean hairline borders and surface highlights */
+.surface-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Gradient Text Style */
-.gradient-text {
-  background: linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #06b6d4 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.surface-panel-interactive {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-:root .gradient-text {
-  background: linear-gradient(135deg, #7c3aed 0%, #2563eb 50%, #0891b2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.surface-panel-interactive:hover {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
 }
 
-/* Animations */
-@keyframes float-slower {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-12px) scale(1.05); }
+.dark .surface-panel-interactive:hover {
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.4);
 }
 
-@keyframes float-faster {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-8px) scale(0.95); }
+/* Monospace telemetry tag */
+.telemetry-badge {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  color: var(--muted-foreground);
 }
 
-@keyframes pulse-soft {
-  0%, 100% { opacity: 0.2; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(1.05); }
-}
-
-@keyframes rotate-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-float-1 {
-  animation: float-slower 8s ease-in-out infinite;
-}
-
-.animate-float-2 {
-  animation: float-faster 6s ease-in-out infinite;
-}
-
-.animate-pulse-soft {
-  animation: pulse-soft 4s ease-in-out infinite;
-}
-
-.animate-rotate-slow {
-  animation: rotate-slow 20s linear infinite;
-}
-
-/* Background grid pattern */
-.bg-grid {
-  background-image:
-    linear-gradient(rgba(168, 85, 247, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(168, 85, 247, 0.035) 1px, transparent 1px);
-  background-size: 50px 50px;
-}
-
-/* Smooth scrollbar */
+/* Clean custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #020205;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.2);
-  border-radius: 4px;
+  background: var(--border);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.4);
+  background: var(--muted-foreground);
 }
 
-/* Fade-in animation for sections */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Spinner */
-@keyframes spin-slow {
-  to { transform: rotate(360deg); }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 1.5s linear infinite;
 }
