@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -10,16 +11,19 @@ import {
   Calendar,
   AlertTriangle,
   ExternalLink,
-  ShieldCheck,
   Award,
+  Sparkles,
+  ShieldAlert,
 } from "lucide-react";
 import { motion } from "motion/react";
-import type { GitHubUser, GitHubRepo } from "@/lib/types";
+import type { GitHubUser, GitHubRepo, Language } from "@/lib/types";
+import { GitcardModal } from "@/components/gitcard-modal";
 
 interface UserProfileProps {
   userData: GitHubUser | null;
   error: string | null;
   repos?: GitHubRepo[];
+  languages?: Language[];
 }
 
 function getAccountAge(createdAt: string): string {
@@ -98,7 +102,9 @@ function computeDeveloperArchetype(userData: GitHubUser, repos?: GitHubRepo[]): 
   };
 }
 
-export function UserProfile({ userData, error, repos }: UserProfileProps) {
+export function UserProfile({ userData, error, repos, languages = [] }: UserProfileProps) {
+  const [isGitcardOpen, setIsGitcardOpen] = useState(false);
+
   if (error) {
     return (
       <motion.div
@@ -139,16 +145,32 @@ export function UserProfile({ userData, error, repos }: UserProfileProps) {
     >
       {/* Editorial Developer Dossier */}
       <div className="surface-panel rounded-lg border border-border bg-card overflow-hidden shadow-xs">
-        {/* Dossier Masthead Bar */}
-        <div className="border-b border-border bg-secondary/40 px-6 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-muted-foreground">
-          <div className="flex items-center gap-2">
+        {/* Dossier Masthead Bar with Gitcard Trigger & Public Scope Notice */}
+        <div className="border-b border-border bg-secondary/40 px-5 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-muted-foreground">
+          <div className="flex items-center gap-2.5">
             <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span className="font-semibold text-foreground">DOSSIER // @{userData.login}</span>
+            <span className="text-[11px] text-muted-foreground/80 hidden sm:inline">
+              · MEMBER SINCE {new Date(userData.created_at).getFullYear()}
+            </span>
           </div>
-          <div className="flex items-center gap-3 text-[11px]">
-            <span>MEMBER SINCE {new Date(userData.created_at).getFullYear()}</span>
-            <span>·</span>
-            <span className="text-primary font-medium">{archetype.badge}</span>
+
+          <div className="flex items-center gap-3">
+            {/* Prominent Public Scope Notice */}
+            <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-mono">
+              <ShieldAlert className="h-3 w-3 shrink-0" />
+              <span>PUBLIC SCOPE ONLY (PRIVATE COMMITS EXCLUDED)</span>
+            </span>
+
+            {/* Export Gitcard Trigger Button */}
+            <button
+              type="button"
+              onClick={() => setIsGitcardOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-primary text-primary-foreground font-mono text-xs font-bold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+            >
+              <Sparkles className="h-3 w-3" />
+              <span>EXPORT GITCARD</span>
+            </button>
           </div>
         </div>
 
@@ -299,6 +321,15 @@ export function UserProfile({ userData, error, repos }: UserProfileProps) {
           </div>
         </div>
       </div>
+
+      {/* Share / Export Gitcard Modal Dialog */}
+      <GitcardModal
+        open={isGitcardOpen}
+        onOpenChange={setIsGitcardOpen}
+        userData={userData}
+        repos={repos || []}
+        languages={languages || []}
+      />
     </motion.div>
   );
 }
