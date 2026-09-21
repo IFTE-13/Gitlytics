@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -17,7 +16,6 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import type { GitHubUser, GitHubRepo, Language } from "@/lib/types";
-import { GitcardModal } from "@/components/gitcard-modal";
 
 interface UserProfileProps {
   userData: GitHubUser | null;
@@ -102,9 +100,7 @@ function computeDeveloperArchetype(userData: GitHubUser, repos?: GitHubRepo[]): 
   };
 }
 
-export function UserProfile({ userData, error, repos, languages = [] }: UserProfileProps) {
-  const [isGitcardOpen, setIsGitcardOpen] = useState(false);
-
+export function UserProfile({ userData, error, repos }: UserProfileProps) {
   if (error) {
     return (
       <motion.div
@@ -136,6 +132,13 @@ export function UserProfile({ userData, error, repos, languages = [] }: UserProf
   const archetype = computeDeveloperArchetype(userData, repos);
   const accountAge = getAccountAge(userData.created_at);
 
+  const scrollToGitcardSection = () => {
+    const el = document.getElementById("gitcard-generator-section");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -162,14 +165,14 @@ export function UserProfile({ userData, error, repos, languages = [] }: UserProf
               <span>PUBLIC SCOPE ONLY (PRIVATE COMMITS EXCLUDED)</span>
             </span>
 
-            {/* Export Gitcard Trigger Button */}
+            {/* Scroll to Gitcard Section Button */}
             <button
               type="button"
-              onClick={() => setIsGitcardOpen(true)}
+              onClick={scrollToGitcardSection}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-primary text-primary-foreground font-mono text-xs font-bold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
             >
               <Sparkles className="h-3 w-3" />
-              <span>EXPORT GITCARD</span>
+              <span>CREATE GITCARD</span>
             </button>
           </div>
         </div>
@@ -321,15 +324,6 @@ export function UserProfile({ userData, error, repos, languages = [] }: UserProf
           </div>
         </div>
       </div>
-
-      {/* Share / Export Gitcard Modal Dialog */}
-      <GitcardModal
-        open={isGitcardOpen}
-        onOpenChange={setIsGitcardOpen}
-        userData={userData}
-        repos={repos || []}
-        languages={languages || []}
-      />
     </motion.div>
   );
 }

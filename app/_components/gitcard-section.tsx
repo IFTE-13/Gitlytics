@@ -2,47 +2,34 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
   Download,
-  Copy,
-  Check,
   Sparkles,
-  Info,
-  Terminal,
-  ShieldAlert,
   Layers,
-  ExternalLink,
+  ShieldAlert,
+  Code2,
+  Check,
 } from "lucide-react";
+import { motion } from "motion/react";
 import type { GitHubUser, GitHubRepo, Language } from "@/lib/types";
+import { ReadmeEmbedModal } from "@/components/readme-embed-modal";
 
 export type CardVariant = "dossier" | "cyber" | "rpg" | "swiss";
 
-interface GitcardModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface GitcardSectionProps {
   userData: GitHubUser | null;
   repos: GitHubRepo[];
   languages: Language[];
 }
 
-export function GitcardModal({
-  open,
-  onOpenChange,
+export function GitcardSection({
   userData,
   repos,
   languages,
-}: GitcardModalProps) {
+}: GitcardSectionProps) {
   const [variant, setVariant] = useState<CardVariant>("dossier");
-  const [activeTab, setActiveTab] = useState<"card" | "hosted">("card");
-  const [copiedMd, setCopiedMd] = useState(false);
-  const [copiedHtml, setCopiedHtml] = useState(false);
+  const [isReadmeModalOpen, setIsReadmeModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const username = userData?.login || "developer";
@@ -81,13 +68,11 @@ export function GitcardModal({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // 1200 x 630 @ standard 1.9:1 canvas
     const W = 1200;
     const H = 630;
     canvas.width = W;
     canvas.height = H;
 
-    // Load avatar if possible
     const avatarImg = new Image();
     avatarImg.crossOrigin = "anonymous";
     avatarImg.onload = () => renderScene(avatarImg);
@@ -98,15 +83,11 @@ export function GitcardModal({
       if (!ctx) return;
       ctx.clearRect(0, 0, W, H);
 
-      // ==========================================
-      // VARIANT 1: TELEMETRY DOSSIER (Editorial Blueprint)
-      // ==========================================
+      // 1. DOSSIER
       if (variant === "dossier") {
-        // Background
         ctx.fillStyle = "#090d16";
         ctx.fillRect(0, 0, W, H);
 
-        // Grid pattern
         ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
         ctx.lineWidth = 1;
         for (let x = 0; x < W; x += 30) {
@@ -122,12 +103,10 @@ export function GitcardModal({
           ctx.stroke();
         }
 
-        // Outer border
         ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
         ctx.lineWidth = 2;
         ctx.strokeRect(30, 30, W - 60, H - 60);
 
-        // Header bar
         ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
         ctx.fillRect(30, 30, W - 60, 50);
 
@@ -139,10 +118,7 @@ export function GitcardModal({
         ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
         ctx.fillText(`MEMBER SINCE ${accountYear}  ·  PUBLIC ARCHIVE DATA`, W - 380, 62);
 
-        // Avatar
-        const avX = 60;
-        const avY = 110;
-        const avS = 130;
+        const avX = 60, avY = 110, avS = 130;
         if (img) {
           ctx.save();
           ctx.beginPath();
@@ -155,7 +131,6 @@ export function GitcardModal({
           ctx.strokeRect(avX, avY, avS, avS);
         }
 
-        // Name & Identity
         ctx.font = "bold 36px sans-serif";
         ctx.fillStyle = "#f8fafc";
         ctx.fillText(userDisplayName, 220, 150);
@@ -168,7 +143,6 @@ export function GitcardModal({
         ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
         ctx.fillText(`ARCHETYPE // ${archetype.tier} — ${archetype.title.toUpperCase()}`, 220, 220);
 
-        // 4 Key Stats Horizontal Strip
         const stats = [
           { label: "STARS RECEIVED", val: totalStars.toLocaleString() },
           { label: "NETWORK FORKS", val: totalForks.toLocaleString() },
@@ -176,8 +150,7 @@ export function GitcardModal({
           { label: "COMMUNITY FOLLOWERS", val: followers.toLocaleString() },
         ];
 
-        const cardW = 260;
-        const cardY = 270;
+        const cardW = 260, cardY = 270;
         stats.forEach((st, idx) => {
           const cardX = 60 + idx * 276;
           ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
@@ -194,16 +167,11 @@ export function GitcardModal({
           ctx.fillText(st.val, cardX + 16, cardY + 82);
         });
 
-        // Language Spectrum Strip
         ctx.font = "bold 12px monospace";
         ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
         ctx.fillText("LINGUISTIC SPECTRUM (TOP LANGUAGES BY BYTE VOLUME)", 60, 430);
 
-        const barX = 60;
-        const barY = 445;
-        const barW = W - 120;
-        const barH = 24;
-
+        const barX = 60, barY = 445, barW = W - 120, barH = 24;
         let curX = barX;
         languages.slice(0, 6).forEach((lang) => {
           const segW = Math.max(8, (lang.percentage / 100) * barW);
@@ -212,7 +180,6 @@ export function GitcardModal({
           curX += segW;
         });
 
-        // Language legend pills
         let legX = 60;
         languages.slice(0, 5).forEach((lang) => {
           ctx.fillStyle = lang.color || "#818cf8";
@@ -226,7 +193,6 @@ export function GitcardModal({
           legX += ctx.measureText(`${lang.name} ${lang.percentage}%`).width + 36;
         });
 
-        // Watermark Footer
         ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
         ctx.beginPath();
         ctx.moveTo(60, 545);
@@ -239,14 +205,11 @@ export function GitcardModal({
         ctx.fillText("GITLYTICS.VERCEL.APP", W - 230, 575);
       }
 
-      // ==========================================
-      // VARIANT 2: CYBER MATRIX (Terminal HUD)
-      // ==========================================
+      // 2. CYBER MATRIX
       else if (variant === "cyber") {
         ctx.fillStyle = "#05070c";
         ctx.fillRect(0, 0, W, H);
 
-        // Cyber Grid Lines
         ctx.strokeStyle = "rgba(56, 189, 248, 0.08)";
         ctx.lineWidth = 1;
         for (let y = 0; y < H; y += 40) {
@@ -256,35 +219,21 @@ export function GitcardModal({
           ctx.stroke();
         }
 
-        // Cyber Border with chamfered look
         ctx.strokeStyle = "#0284c7";
         ctx.lineWidth = 2;
         ctx.strokeRect(36, 36, W - 72, H - 72);
 
-        // Corner decorative crosses
-        const corners = [
-          [36, 36],
-          [W - 36, 36],
-          [36, H - 36],
-          [W - 36, H - 36],
-        ];
+        const corners = [[36, 36], [W - 36, 36], [36, H - 36], [W - 36, H - 36]];
         ctx.fillStyle = "#38bdf8";
-        corners.forEach(([cx, cy]) => {
-          ctx.fillRect(cx - 5, cy - 5, 10, 10);
-        });
+        corners.forEach(([cx, cy]) => ctx.fillRect(cx - 5, cy - 5, 10, 10));
 
-        // Top Terminal Header
         ctx.font = "bold 15px monospace";
         ctx.fillStyle = "#38bdf8";
         ctx.fillText("> SYS_DIAGNOSTIC_V2 // ID: 0x" + username.toUpperCase(), 60, 75);
-
         ctx.fillStyle = "#f59e0b";
         ctx.fillText(`STATUS: ONLINE [PUBLIC_GROUND_TRUTH]`, W - 390, 75);
 
-        // Avatar with cyber border
-        const avX = 60;
-        const avY = 110;
-        const avS = 130;
+        const avX = 60, avY = 110, avS = 130;
         if (img) {
           ctx.save();
           ctx.drawImage(img, avX, avY, avS, avS);
@@ -294,7 +243,6 @@ export function GitcardModal({
           ctx.strokeRect(avX - 2, avY - 2, avS + 4, avS + 4);
         }
 
-        // Identity
         ctx.font = "bold 40px monospace";
         ctx.fillStyle = "#ffffff";
         ctx.fillText(userDisplayName.toUpperCase(), 220, 155);
@@ -307,7 +255,6 @@ export function GitcardModal({
         ctx.fillStyle = "#f59e0b";
         ctx.fillText(`PRIMARY_CORE: ${topLanguage.toUpperCase()} · TENURE: ${tenureYears} CYCLES`, 220, 225);
 
-        // Cyber Metric Boxes with Progress Blocks
         const metrics = [
           { label: "STAR_GRAVITY", val: totalStars.toLocaleString(), pct: Math.min(100, Math.round((totalStars / 500) * 100)) },
           { label: "NETWORK_FORKS", val: totalForks.toLocaleString(), pct: Math.min(100, Math.round((totalForks / 200) * 100)) },
@@ -331,13 +278,10 @@ export function GitcardModal({
           ctx.fillStyle = "#ffffff";
           ctx.fillText(m.val, boxX + 16, boxY + 75);
 
-          // ASCII progress meter
           const totalBlocks = 12;
           const filled = Math.max(1, Math.round((m.pct / 100) * totalBlocks));
           let bar = "[";
-          for (let b = 0; b < totalBlocks; b++) {
-            bar += b < filled ? "█" : "░";
-          }
+          for (let b = 0; b < totalBlocks; b++) bar += b < filled ? "█" : "░";
           bar += `] ${m.pct}%`;
 
           ctx.font = "11px monospace";
@@ -345,7 +289,6 @@ export function GitcardModal({
           ctx.fillText(bar, boxX + 16, boxY + 108);
         });
 
-        // Language Hex Strip
         ctx.font = "bold 12px monospace";
         ctx.fillStyle = "#38bdf8";
         ctx.fillText("COMPILED_BYTE_SPECTRUM:", 60, 445);
@@ -365,28 +308,23 @@ export function GitcardModal({
           curLx += tw + 12;
         });
 
-        // Footer disclaimer
         ctx.font = "11px monospace";
         ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
         ctx.fillText("! PUBLIC REPOSITORIES ONLY · PRIVATE REPOS EXCLUDED // GITLYTICS v2.6", 60, 565);
         ctx.fillText("AUTHENTIC GITHUB TELEMETRY", W - 270, 565);
       }
 
-      // ==========================================
-      // VARIANT 3: RPG ADVENTURER (Quest Card)
-      // ==========================================
+      // 3. RPG ADVENTURER
       else if (variant === "rpg") {
         ctx.fillStyle = "#0c0a17";
         ctx.fillRect(0, 0, W, H);
 
-        // Gold & Rune Border
         ctx.strokeStyle = "#d97706";
         ctx.lineWidth = 3;
         ctx.strokeRect(36, 36, W - 72, H - 72);
         ctx.strokeStyle = "rgba(217, 119, 6, 0.3)";
         ctx.strokeRect(44, 44, W - 88, H - 88);
 
-        // Class & Level Banner
         ctx.fillStyle = "#d97706";
         ctx.fillRect(60, 60, 160, 32);
         ctx.font = "bold 14px sans-serif";
@@ -397,10 +335,7 @@ export function GitcardModal({
         ctx.fillStyle = "#fde68a";
         ctx.fillText(`GUILD ARCHIVE: ${userData?.company || "OPEN SOURCE REALM"}`, 240, 82);
 
-        // Avatar
-        const avX = 60;
-        const avY = 115;
-        const avS = 130;
+        const avX = 60, avY = 115, avS = 130;
         if (img) {
           ctx.save();
           ctx.drawImage(img, avX, avY, avS, avS);
@@ -410,7 +345,6 @@ export function GitcardModal({
           ctx.strokeRect(avX, avY, avS, avS);
         }
 
-        // Hero Title & Class
         ctx.font = "bold 38px serif";
         ctx.fillStyle = "#fef3c7";
         ctx.fillText(userDisplayName, 220, 155);
@@ -423,7 +357,6 @@ export function GitcardModal({
         ctx.fillStyle = "rgba(254, 243, 199, 0.7)";
         ctx.fillText(`Special Skill: ${topLanguage} Resonance  ·  Tenure: ${tenureYears} Years in Code Realm`, 220, 225);
 
-        // RPG Attribute Grid (STR, DEX, INT, WIS)
         const rpgStats = [
           { stat: "STR // STAR GRAVITY", val: totalStars.toLocaleString(), desc: "Force of community influence" },
           { stat: "DEX // FORK LEVERAGE", val: totalForks.toLocaleString(), desc: "Downstream derivative branches" },
@@ -452,7 +385,6 @@ export function GitcardModal({
           ctx.fillText(st.desc, cardX + 16, cardY + 98);
         });
 
-        // Spells / Language Tomes
         ctx.font = "bold 13px monospace";
         ctx.fillStyle = "#fde68a";
         ctx.fillText("LANGUAGE MASTERY & GRIMOIRE:", 60, 440);
@@ -472,29 +404,23 @@ export function GitcardModal({
           tX += tw + 12;
         });
 
-        // Disclaimer
         ctx.font = "11px monospace";
         ctx.fillStyle = "rgba(217, 119, 6, 0.7)";
         ctx.fillText("HERO METRICS FORGED FROM PUBLIC REALM API · PRIVATE ACTIVITIES UNCHARTED", 60, 565);
         ctx.fillText("CARD #GL-2026-" + username.toUpperCase().slice(0, 6), W - 260, 565);
       }
 
-      // ==========================================
-      // VARIANT 4: SWISS MODERNIST (Editorial International)
-      // ==========================================
+      // 4. SWISS MODERNIST
       else {
         ctx.fillStyle = "#f8f9fa";
         ctx.fillRect(0, 0, W, H);
 
-        // Bold red accent block
         ctx.fillStyle = "#e11d48";
         ctx.fillRect(0, 0, 16, H);
 
-        // Editorial Masthead
         ctx.font = "bold 13px monospace";
         ctx.fillStyle = "#090d16";
         ctx.fillText("GITLYTICS / INTERNATIONAL DEVELOPER DOSSIER", 60, 65);
-
         ctx.fillStyle = "#64748b";
         ctx.fillText(`YEAR: ${accountYear}  ·  PUBLIC API VERIFIED`, W - 320, 65);
 
@@ -505,10 +431,7 @@ export function GitcardModal({
         ctx.lineTo(W - 60, 80);
         ctx.stroke();
 
-        // Avatar
-        const avX = 60;
-        const avY = 110;
-        const avS = 130;
+        const avX = 60, avY = 110, avS = 130;
         if (img) {
           ctx.save();
           ctx.drawImage(img, avX, avY, avS, avS);
@@ -518,7 +441,6 @@ export function GitcardModal({
           ctx.strokeRect(avX, avY, avS, avS);
         }
 
-        // Bold Typography
         ctx.font = "900 44px sans-serif";
         ctx.fillStyle = "#090d16";
         ctx.fillText(userDisplayName, 220, 155);
@@ -531,7 +453,6 @@ export function GitcardModal({
         ctx.fillStyle = "#64748b";
         ctx.fillText(`${archetype.title.toUpperCase()}  ·  ${userData?.location || "GLOBAL"}`, 220, 225);
 
-        // Large Swiss Numbers Strip
         const stats = [
           { label: "STAR ACCUMULATION", val: totalStars.toLocaleString() },
           { label: "NETWORK FORKS", val: totalForks.toLocaleString() },
@@ -560,7 +481,6 @@ export function GitcardModal({
           ctx.fillText(st.val, cardX + 16, cardY + 85);
         });
 
-        // Language Matrix
         ctx.font = "bold 12px monospace";
         ctx.fillStyle = "#090d16";
         ctx.fillText("PRIMARY CODE VOLUMES (MEASURED IN SOURCE BYTES):", 60, 445);
@@ -577,7 +497,6 @@ export function GitcardModal({
           swX += ctx.measureText(txt).width + 36;
         });
 
-        // Disclaimer
         ctx.strokeStyle = "#e2e8f0";
         ctx.beginPath();
         ctx.moveTo(60, 535);
@@ -593,14 +512,8 @@ export function GitcardModal({
   }, [variant, userData, repos, languages, username, userDisplayName, totalStars, totalForks, totalRepos, followers, topLanguage, archetype, accountYear, tenureYears, developerLevel]);
 
   useEffect(() => {
-    if (open) {
-      // Delay slightly so DOM is ready
-      const timer = setTimeout(() => {
-        drawCard();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [open, drawCard]);
+    drawCard();
+  }, [drawCard]);
 
   // Export functions
   const downloadImage = (format: "png" | "jpg") => {
@@ -617,74 +530,77 @@ export function GitcardModal({
     link.href = dataUrl;
     link.click();
     setIsExporting(false);
-  };
-
-  const copyMarkdown = () => {
-    const snippet = `[![Gitcard](./gitcard.png)](https://gitlytics.vercel.app/?u=${username})`;
-    navigator.clipboard.writeText(snippet);
-    setCopiedMd(true);
-    setTimeout(() => setCopiedMd(false), 2000);
-  };
-
-  const copyHtml = () => {
-    const snippet = `<p align="center">\n  <a href="https://gitlytics.vercel.app/?u=${username}">\n    <img src="./gitcard.png" alt="${username}'s Gitcard Stats" width="600" />\n  </a>\n</p>`;
-    navigator.clipboard.writeText(snippet);
-    setCopiedHtml(true);
-    setTimeout(() => setCopiedHtml(false), 2000);
+    setDownloadSuccess(format.toUpperCase());
+    setTimeout(() => setDownloadSuccess(null), 3000);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-5 sm:p-7 bg-background border-border shadow-2xl">
-        <DialogHeader className="border-b border-border pb-4">
+    <motion.section
+      id="gitcard-generator-section"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6"
+    >
+      <div className="surface-panel rounded-lg border border-border bg-card p-6 sm:p-8 shadow-xs">
+        
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-border gap-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 items-center justify-center rounded bg-primary/10 text-primary">
               <Sparkles className="h-4 w-4" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-bold font-display text-foreground">
-                Add to GitHub Profile README
-              </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground font-sans mt-0.5">
-                Generate and embed your custom Gitcard into your GitHub profile or repository
-              </DialogDescription>
+              <h3 className="font-display font-bold text-lg text-foreground tracking-tight">
+                Gitcard Generator // Collectible Profile Specimen
+              </h3>
+              <p className="text-xs text-muted-foreground font-sans">
+                Render and export high-resolution stat cards formatted for your GitHub profile README
+              </p>
             </div>
           </div>
-        </DialogHeader>
 
-        {/* Card Variant Selector Tabs */}
-        <div className="space-y-3 pt-2">
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary text-[11px] font-mono text-muted-foreground">
+              <ShieldAlert className="h-3.5 w-3.5 text-amber-500" />
+              <span>PUBLIC SCOPE ONLY</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Variant Selector Tabs */}
+        <div className="space-y-3 pt-5">
           <div className="flex items-center justify-between">
             <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <Layers className="h-3.5 w-3.5 text-primary" />
-              <span>Select Gitcard Theme Variant:</span>
+              <span>Select Card Design Aesthetic:</span>
             </label>
             <span className="text-[10px] font-mono text-muted-foreground">
-              4 DISTINCT AESTHETICS
+              4 BESPOKE CREATIVE THEMES
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {[
-              { id: "dossier", name: "Telemetry Dossier", desc: "Editorial blueprint" },
-              { id: "cyber", name: "Cyber Matrix", desc: "Neon HUD telemetry" },
-              { id: "rpg", name: "RPG Adventurer", desc: "Hero quest card" },
-              { id: "swiss", name: "Swiss Modernist", desc: "Bold typography" },
+              { id: "dossier", name: "Telemetry Dossier", desc: "Editorial architectural blueprint" },
+              { id: "cyber", name: "Cyber Matrix", desc: "Obsidian terminal HUD & meters" },
+              { id: "rpg", name: "RPG Adventurer", desc: "Hero level, class & grimoire" },
+              { id: "swiss", name: "Swiss Modernist", desc: "Bold international typography" },
             ].map((v) => (
               <button
                 key={v.id}
                 type="button"
                 onClick={() => setVariant(v.id as CardVariant)}
-                className={`p-2.5 text-left rounded border transition-all cursor-pointer ${
+                className={`p-3 text-left rounded-lg border transition-all cursor-pointer ${
                   variant === v.id
-                    ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary/30"
-                    : "border-border bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary/40 shadow-xs"
+                    : "border-border bg-secondary/30 text-muted-foreground hover:bg-secondary hover:text-foreground"
                 }`}
               >
                 <div className="font-mono text-xs font-bold text-foreground">
                   {v.name}
                 </div>
-                <div className="text-[10px] text-muted-foreground mt-0.5 font-sans">
+                <div className="text-[11px] text-muted-foreground mt-0.5 font-sans">
                   {v.desc}
                 </div>
               </button>
@@ -693,215 +609,80 @@ export function GitcardModal({
         </div>
 
         {/* Live Canvas Preview */}
-        <div className="space-y-2">
-          <div className="rounded-lg border border-border overflow-hidden bg-card/80 flex items-center justify-center p-2 shadow-inner">
-            <canvas
-              ref={canvasRef}
-              className="w-full h-auto rounded max-h-[320px] object-contain shadow-md"
-            />
-          </div>
-
-          {/* Download Buttons */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => downloadImage("png")}
-                disabled={isExporting}
-                className="px-4 py-2 rounded bg-primary text-primary-foreground font-mono text-xs font-bold hover:opacity-90 active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span>Export as PNG</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => downloadImage("jpg")}
-                disabled={isExporting}
-                className="px-3.5 py-2 rounded border border-border bg-secondary text-foreground font-mono text-xs font-semibold hover:bg-card active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span>Export as JPG</span>
-              </button>
-            </div>
-
-            <div className="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
-              <ShieldAlert className="h-3.5 w-3.5 text-amber-500" />
-              <span>Public activity only · Private commits excluded</span>
-            </div>
-          </div>
+        <div className="my-6 rounded-lg border border-border overflow-hidden bg-secondary/30 flex items-center justify-center p-3 sm:p-5 shadow-inner">
+          <canvas
+            ref={canvasRef}
+            className="w-full h-auto rounded max-h-[380px] object-contain shadow-lg"
+          />
         </div>
 
-        {/* README Embed Instructions (Tabbed - matching the exact user screenshot) */}
-        <div className="space-y-4 pt-4 border-t border-border">
-          {/* Tabs header */}
-          <div className="grid grid-cols-2 rounded-lg border border-border bg-secondary/40 p-1">
+        {/* Export & Action Controls */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
+          <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+            {/* Export as PNG */}
             <button
               type="button"
-              onClick={() => setActiveTab("card")}
-              className={`py-2 text-xs font-mono font-bold rounded transition-colors cursor-pointer ${
-                activeTab === "card"
-                  ? "bg-card text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              onClick={() => downloadImage("png")}
+              disabled={isExporting}
+              className="px-4 py-2.5 rounded bg-primary text-primary-foreground font-mono text-xs font-bold hover:opacity-90 active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
             >
-              1. Your Card (gitcard.png)
+              {downloadSuccess === "PNG" ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-primary-foreground" />
+                  <span>Downloaded gitcard.png</span>
+                </>
+              ) : (
+                <>
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export as PNG</span>
+                </>
+              )}
             </button>
+
+            {/* Export as JPG */}
             <button
               type="button"
-              onClick={() => setActiveTab("hosted")}
-              className={`py-2 text-xs font-mono font-bold rounded transition-colors cursor-pointer ${
-                activeTab === "hosted"
-                  ? "bg-card text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              onClick={() => downloadImage("jpg")}
+              disabled={isExporting}
+              className="px-4 py-2.5 rounded border border-border bg-secondary text-foreground font-mono text-xs font-semibold hover:bg-card active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
             >
-              2. Hosted Web Badge
+              {downloadSuccess === "JPG" ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Downloaded gitcard.jpg</span>
+                </>
+              ) : (
+                <>
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export as JPG</span>
+                </>
+              )}
+            </button>
+
+            {/* Trigger Markdown/HTML Embed Modal */}
+            <button
+              type="button"
+              onClick={() => setIsReadmeModalOpen(true)}
+              className="px-4 py-2.5 rounded border border-primary/40 bg-primary/10 text-primary font-mono text-xs font-bold hover:bg-primary/20 transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+            >
+              <Code2 className="h-3.5 w-3.5" />
+              <span>Add to GitHub Profile README</span>
             </button>
           </div>
 
-          {activeTab === "card" ? (
-            <div className="space-y-4">
-              {/* How to show card in 2 steps */}
-              <div className="p-4 rounded-lg border border-primary/25 bg-primary/5 space-y-2 text-xs font-sans">
-                <div className="flex items-center gap-2 font-mono font-bold text-foreground">
-                  <Info className="h-4 w-4 text-primary shrink-0" />
-                  <span>How to show your personal card in 2 steps:</span>
-                </div>
-                <ol className="list-decimal list-inside space-y-1 text-muted-foreground pl-1 leading-relaxed">
-                  <li>
-                    Click <strong className="text-foreground">Export as PNG</strong> above and save as{" "}
-                    <code className="px-1.5 py-0.5 rounded bg-secondary font-mono text-[11px] text-foreground">
-                      gitcard.png
-                    </code>
-                    .
-                  </li>
-                  <li>
-                    Upload{" "}
-                    <code className="px-1.5 py-0.5 rounded bg-secondary font-mono text-[11px] text-foreground">
-                      gitcard.png
-                    </code>{" "}
-                    to your{" "}
-                    <code className="px-1.5 py-0.5 rounded bg-secondary font-mono text-[11px] text-foreground">
-                      {username}/{username}
-                    </code>{" "}
-                    profile repository, then paste either snippet below into your{" "}
-                    <code className="px-1.5 py-0.5 rounded bg-secondary font-mono text-[11px] text-foreground">
-                      README.md
-                    </code>
-                    .
-                  </li>
-                </ol>
-              </div>
-
-              {/* Markdown Snippet */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="font-bold text-foreground flex items-center gap-1.5">
-                    <Terminal className="h-3.5 w-3.5 text-primary" />
-                    <span>Markdown Snippet</span>
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">Standard GitHub README</span>
-                </div>
-                <div className="flex items-center justify-between gap-3 p-3 rounded border border-border bg-secondary/60 font-mono text-xs text-foreground overflow-x-auto">
-                  <code className="truncate text-primary">
-                    {`[![Gitcard](./gitcard.png)](https://gitlytics.vercel.app/?u=${username})`}
-                  </code>
-                  <button
-                    type="button"
-                    onClick={copyMarkdown}
-                    className="px-3 py-1.5 rounded bg-card border border-border text-foreground hover:bg-secondary flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer text-xs font-semibold shadow-2xs"
-                  >
-                    {copiedMd ? (
-                      <>
-                        <Check className="h-3.5 w-3.5 text-emerald-500" />
-                        <span className="text-emerald-500">Copied</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-3.5 w-3.5" />
-                        <span>Copy Markdown</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* HTML Embed (Centered & Resized) */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="font-bold text-foreground flex items-center gap-1.5">
-                    <Terminal className="h-3.5 w-3.5 text-primary" />
-                    <span>HTML Embed (Centered & Resized)</span>
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">Custom alignment</span>
-                </div>
-                <div className="flex items-start justify-between gap-3 p-3 rounded border border-border bg-secondary/60 font-mono text-xs text-foreground">
-                  <pre className="overflow-x-auto text-muted-foreground text-[11px] leading-relaxed">
-{`<p align="center">
-  <a href="https://gitlytics.vercel.app/?u=${username}">
-    <img src="./gitcard.png" alt="${username}'s Gitcard Stats" width="600" />
-  </a>
-</p>`}
-                  </pre>
-                  <button
-                    type="button"
-                    onClick={copyHtml}
-                    className="px-3 py-1.5 rounded bg-card border border-border text-foreground hover:bg-secondary flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer text-xs font-semibold shadow-2xs"
-                  >
-                    {copiedHtml ? (
-                      <>
-                        <Check className="h-3.5 w-3.5 text-emerald-500" />
-                        <span className="text-emerald-500">Copied</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-3.5 w-3.5" />
-                        <span>Copy HTML</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* Tab 2: Hosted Web Badge */
-            <div className="space-y-3 p-4 rounded-lg border border-border bg-secondary/30 text-xs font-mono">
-              <p className="text-muted-foreground font-sans">
-                Link directly to your live Gitlytics intelligence report using a badge:
-              </p>
-              <div className="p-3 rounded bg-card border border-border text-primary break-all">
-                {`[![Gitlytics Profile](https://img.shields.io/badge/Gitlytics-@${username}-6366f1?style=for-the-badge&logo=github)](https://gitlytics.vercel.app/?u=${username})`}
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(
-                    `[![Gitlytics Profile](https://img.shields.io/badge/Gitlytics-@${username}-6366f1?style=for-the-badge&logo=github)](https://gitlytics.vercel.app/?u=${username})`
-                  );
-                  alert("Badge snippet copied to clipboard!");
-                }}
-                className="px-3 py-1.5 rounded bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity cursor-pointer"
-              >
-                Copy Badge Snippet
-              </button>
-            </div>
-          )}
-
-          {/* Footer Preview Link */}
-          <div className="pt-2 text-center text-xs font-mono text-muted-foreground">
-            Preview live profile link:{" "}
-            <a
-              href={`https://gitlytics.vercel.app/?u=${username}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline inline-flex items-center gap-1"
-            >
-              <span>{`https://gitlytics.vercel.app/?u=${username}`}</span>
-              <ExternalLink className="h-3 w-3" />
-            </a>
+          <div className="text-[11px] font-mono text-muted-foreground flex items-center gap-1.5 self-start sm:self-center">
+            <ShieldAlert className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+            <span>Raw ground truth · Private contributions excluded</span>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+
+      {/* Markdown / HTML Embed Modal */}
+      <ReadmeEmbedModal
+        open={isReadmeModalOpen}
+        onOpenChange={setIsReadmeModalOpen}
+        username={username}
+      />
+    </motion.section>
   );
 }
