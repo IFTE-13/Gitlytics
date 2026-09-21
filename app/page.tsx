@@ -112,7 +112,13 @@ export default function Home() {
       {!isLoading && (
         <div className="space-y-4">
           {/* User Profile Dossier (or Error State) */}
-          <UserProfile userData={userData} error={error} repos={repos} />
+          {/* User Profile Dossier (or Error State) */}
+          <UserProfile
+            userData={userData}
+            error={error}
+            repos={repos}
+            languages={languages}
+          />
 
           {/* Render Analytics only when profile & repository data are available */}
           {userData && repos.length > 0 && (
@@ -146,25 +152,50 @@ export default function Home() {
       )}
 
       {/* Editorial Telemetry Footer */}
-      <footer className="mt-20 border-t border-border pt-8 pb-12 text-xs font-mono text-muted-foreground">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-foreground font-display">GITLYTICS</span>
-            <span>//</span>
-            <span>TELEMETRY ARCHIVE ENGINE</span>
+      <footer className="mt-20 border-t border-border pt-8 pb-12 text-xs font-mono text-muted-foreground bg-card/30">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-foreground font-display">GITLYTICS</span>
+              <span>//</span>
+              <span>TELEMETRY ARCHIVE ENGINE</span>
+              <span className="text-[10px] text-primary hidden md:inline font-mono">v2.6</span>
+            </div>
+
+            {/* Legal & Help Links */}
+            <div className="flex flex-wrap items-center gap-5 text-xs">
+              <a href="/faq" className="hover:text-foreground transition-colors">
+                FAQ & Docs
+              </a>
+              <a href="/privacy" className="hover:text-foreground transition-colors">
+                Privacy Policy
+              </a>
+              <a href="/cookies" className="hover:text-foreground transition-colors">
+                Cookies & Storage
+              </a>
+              <a href="/license" className="hover:text-foreground transition-colors">
+                MIT License
+              </a>
+            </div>
           </div>
 
-          <div className="text-center sm:text-right font-sans text-[11px] text-muted-foreground/80">
-            Ground-truth data proxied through the official{" "}
-            <a
-              href="https://docs.github.com/en/rest"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground underline underline-offset-2 hover:text-primary transition-colors"
-            >
-              GitHub REST API v3
-            </a>
-            . Zero synthetic metrics.
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-border/60 pt-4 text-[11px] font-sans text-muted-foreground/80">
+            <div>
+              Ground-truth data proxied through the official{" "}
+              <a
+                href="https://docs.github.com/en/rest"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground underline underline-offset-2 hover:text-primary transition-colors font-mono"
+              >
+                GitHub REST API v3
+              </a>
+              . Zero synthetic metrics.
+            </div>
+
+            <div className="text-amber-600 dark:text-amber-400 font-mono text-[10px]">
+              * Note: Private contributions and repositories are excluded via public API scope.
+            </div>
           </div>
         </div>
       </footer>
