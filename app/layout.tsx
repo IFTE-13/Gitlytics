@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Outfit, JetBrains_Mono } from "next/font/google";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
+import Script from "next/script";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -23,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gitlytics",
+  title: "Gitlytics — Developer Intelligence & Repository Analytics",
   description:
     "An editorial developer analytics engine that translates GitHub repository activity, language gravity, and commit patterns into actionable insight.",
 };
@@ -36,16 +37,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-accent="iris">
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                var accent = localStorage.getItem('gitlytics-accent') || 'iris';
-                document.documentElement.dataset.accent = accent;
-              } catch (e) {}
-            `,
-          }}
-        />
+        <Script
+          id="gitlytics-accent-init"
+          strategy="beforeInteractive"
+        >
+          {`
+            try {
+              var accent = localStorage.getItem('gitlytics-accent') || 'iris';
+              document.documentElement.dataset.accent = accent;
+            } catch (e) {}
+          `}
+        </Script>
       </head>
       <body
         className={`${spaceGrotesk.variable} ${outfit.variable} ${jetbrainsMono.variable} font-sans antialiased min-h-screen bg-background text-foreground`}

@@ -56,10 +56,10 @@ export function HeroParticleSphere({
     resize();
     window.addEventListener("resize", resize);
 
-    // Generate particles on sphere using golden spiral
-    const particleCount = Math.floor(650 * propsRef.current.density);
+    // Generate particles on sphere using golden spiral (larger grand radius)
+    const particleCount = Math.floor(950 * propsRef.current.density);
     const particles: Particle3D[] = [];
-    const sphereRadius = Math.min(width, height) * 0.32;
+    const sphereRadius = Math.min(width, height) * 0.44;
 
     for (let i = 0; i < particleCount; i++) {
       const phi = Math.acos(1 - (2 * (i + 0.5)) / particleCount);
@@ -67,8 +67,8 @@ export function HeroParticleSphere({
       particles.push({
         theta,
         phi,
-        baseRadius: sphereRadius + (Math.random() - 0.5) * 16,
-        size: Math.random() > 0.85 ? 2.2 : Math.random() > 0.5 ? 1.6 : 1.1,
+        baseRadius: sphereRadius + (Math.random() - 0.5) * 20,
+        size: Math.random() > 0.85 ? 2.4 : Math.random() > 0.5 ? 1.8 : 1.2,
         alpha: Math.random() * 0.5 + 0.35,
         noiseOffset: Math.random() * Math.PI * 2,
       });
@@ -108,7 +108,7 @@ export function HeroParticleSphere({
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
 
-    const fov = 400;
+    const fov = 480;
 
     const render = () => {
       time += 0.015 * propsRef.current.fluxDynamics;
@@ -132,7 +132,7 @@ export function HeroParticleSphere({
       }> = [];
 
       const currentFlux = propsRef.current.fluxDynamics;
-      const currentRadius = Math.min(width, height) * 0.32;
+      const currentRadius = Math.min(width, height) * 0.44;
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];

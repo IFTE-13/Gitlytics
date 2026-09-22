@@ -3,39 +3,62 @@
 import { Github, Activity, Command } from "lucide-react";
 import Link from "next/link";
 import { ThemeSelector } from "./theme-selector";
+import { useEffect } from "react";
 
 export function Navbar() {
+  // Global Ctrl+K / Cmd+K listener
+  useEffect(() => {
+    const handleGlobalKey = (e: KeyboardEvent) => {
+      const isK = e.key?.toLowerCase() === "k" || e.code === "KeyK";
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        isK &&
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA"
+      ) {
+        e.preventDefault();
+        const input = document.getElementById("username-input") as HTMLInputElement | null;
+        if (input) {
+          input.focus();
+          input.select();
+          input.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKey);
+    return () => window.removeEventListener("keydown", handleGlobalKey);
+  }, []);
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand identity */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <Link
             href="/"
-            className="flex items-center gap-2.5 group focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-primary rounded"
+            className="flex items-center gap-2 group focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-primary rounded"
           >
             <div className="flex h-7 w-7 items-center justify-center rounded bg-primary text-primary-foreground font-mono font-bold text-xs tracking-wider shadow-xs group-hover:opacity-90 transition-opacity">
               GL
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-display font-bold tracking-tight text-base sm:text-lg text-foreground">
-                Gitlytics
-              </span>
-              <Link
-                href="/changelog"
-                className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest hidden sm:inline hover:text-primary transition-colors bg-secondary/80 px-1.5 py-0.5 rounded border border-border/60 hover:border-primary/40"
-                title="View Gitlytics Version Timeline & Changelog"
-              >
-                v2.6
-              </Link>
-            </div>
+            <span className="font-display font-bold tracking-tight text-base sm:text-lg text-foreground">
+              Gitlytics
+            </span>
           </Link>
 
-          {/* System status pill */}
-          <div className="hidden md:flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground border-l border-border pl-3 ml-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>ENGINE ONLINE</span>
-          </div>
+          <Link
+            href="/changelog"
+            className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest hidden sm:inline hover:text-primary transition-colors bg-secondary/80 px-1.5 py-0.5 rounded border border-border/60 hover:border-primary/40"
+            title="View Gitlytics Version Timeline & Changelog"
+          >
+            v2.6
+          </Link>
+        </div>
+
+        {/* System status pill */}
+        <div className="hidden md:flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground border-l border-border pl-3 ml-1">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span>ENGINE ONLINE</span>
         </div>
 
         {/* Right tools */}
@@ -44,17 +67,18 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => {
-              const input = document.getElementById("username-input");
+              const input = document.getElementById("username-input") as HTMLInputElement | null;
               if (input) {
                 input.focus();
+                input.select();
                 input.scrollIntoView({ behavior: "smooth", block: "center" });
               }
             }}
-            className="hidden lg:flex items-center gap-1.5 px-2 py-1 text-xs font-mono text-muted-foreground border border-border/80 rounded bg-secondary/60 hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
-            title="Focus search input"
+            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono text-muted-foreground border border-border/80 rounded bg-secondary/60 hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
+            title="Press Ctrl+K or Cmd+K to inspect handle"
           >
-            <Command className="h-3 w-3" />
-            <span>K</span>
+            <Command className="h-3 w-3 text-primary" />
+            <span className="font-semibold text-foreground text-[11px]">Ctrl+K</span>
             <span className="text-[10px] text-muted-foreground/70 ml-0.5">Quick Inspect</span>
           </button>
 

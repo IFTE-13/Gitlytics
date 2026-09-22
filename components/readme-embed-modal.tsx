@@ -54,14 +54,14 @@ export function ReadmeEmbedModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-7 bg-background border-border shadow-2xl">
+      <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto overflow-x-hidden p-5 sm:p-7 bg-background border-border shadow-2xl">
         <DialogHeader className="border-b border-border pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10 text-primary">
+            <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10 text-primary shrink-0">
               <Code2 className="h-4 w-4" />
             </div>
-            <div>
-              <DialogTitle className="text-xl font-bold font-display text-foreground">
+            <div className="min-w-0">
+              <DialogTitle className="text-xl font-bold font-display text-foreground truncate">
                 Add to GitHub Profile README
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground font-sans mt-0.5">
@@ -72,12 +72,12 @@ export function ReadmeEmbedModal({
         </DialogHeader>
 
         {/* Tab switcher matching the reference */}
-        <div className="pt-2 space-y-4">
+        <div className="pt-2 space-y-4 w-full min-w-0 overflow-x-hidden">
           <div className="grid grid-cols-2 rounded-lg border border-border bg-secondary/40 p-1">
             <button
               type="button"
               onClick={() => setActiveTab("card")}
-              className={`py-2 text-xs font-mono font-bold rounded transition-colors cursor-pointer ${
+              className={`py-2 text-xs font-mono font-bold rounded transition-colors cursor-pointer truncate ${
                 activeTab === "card"
                   ? "bg-card text-foreground shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
@@ -88,7 +88,7 @@ export function ReadmeEmbedModal({
             <button
               type="button"
               onClick={() => setActiveTab("hosted")}
-              className={`py-2 text-xs font-mono font-bold rounded transition-colors cursor-pointer ${
+              className={`py-2 text-xs font-mono font-bold rounded transition-colors cursor-pointer truncate ${
                 activeTab === "hosted"
                   ? "bg-card text-foreground shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
@@ -99,7 +99,7 @@ export function ReadmeEmbedModal({
           </div>
 
           {activeTab === "card" ? (
-            <div className="space-y-4">
+            <div className="space-y-4 w-full min-w-0">
               {/* How to show card in 2 steps */}
               <div className="p-4 rounded-lg border border-primary/25 bg-primary/5 space-y-2 text-xs font-sans">
                 <div className="flex items-center gap-2 font-mono font-bold text-foreground">
@@ -133,22 +133,22 @@ export function ReadmeEmbedModal({
               </div>
 
               {/* Markdown Snippet */}
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 w-full min-w-0">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="font-bold text-foreground flex items-center gap-1.5">
                     <Terminal className="h-3.5 w-3.5 text-primary" />
                     <span>Markdown Snippet</span>
                   </span>
-                  <span className="text-[11px] text-muted-foreground">Standard GitHub README</span>
+                  <span className="text-[11px] text-muted-foreground hidden sm:inline">Standard GitHub README</span>
                 </div>
-                <div className="flex items-center justify-between gap-3 p-3 rounded border border-border bg-secondary/60 font-mono text-xs text-foreground overflow-x-auto">
-                  <code className="truncate text-primary">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded border border-border bg-secondary/60 font-mono text-xs text-foreground w-full min-w-0">
+                  <code className="text-primary break-all whitespace-pre-wrap flex-1 min-w-0">
                     {markdownSnippet}
                   </code>
                   <button
                     type="button"
                     onClick={() => copyToClipboard(markdownSnippet, "md")}
-                    className="px-3 py-1.5 rounded bg-card border border-border text-foreground hover:bg-secondary flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer text-xs font-semibold shadow-2xs"
+                    className="px-3 py-1.5 rounded bg-card border border-border text-foreground hover:bg-secondary flex items-center justify-center gap-1.5 shrink-0 transition-colors cursor-pointer text-xs font-semibold shadow-2xs self-end sm:self-center"
                   >
                     {copiedMd ? (
                       <>
@@ -166,22 +166,22 @@ export function ReadmeEmbedModal({
               </div>
 
               {/* HTML Embed (Centered & Resized) */}
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 w-full min-w-0">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="font-bold text-foreground flex items-center gap-1.5">
                     <Terminal className="h-3.5 w-3.5 text-primary" />
                     <span>HTML Embed (Centered & Resized)</span>
                   </span>
-                  <span className="text-[11px] text-muted-foreground">Custom alignment</span>
+                  <span className="text-[11px] text-muted-foreground hidden sm:inline">Custom alignment</span>
                 </div>
-                <div className="flex items-start justify-between gap-3 p-3 rounded border border-border bg-secondary/60 font-mono text-xs text-foreground">
-                  <pre className="overflow-x-auto text-muted-foreground text-[11px] leading-relaxed">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 p-3 rounded border border-border bg-secondary/60 font-mono text-xs text-foreground w-full min-w-0">
+                  <pre className="text-muted-foreground text-[11px] leading-relaxed break-all whitespace-pre-wrap flex-1 min-w-0 font-mono">
 {htmlSnippet}
                   </pre>
                   <button
                     type="button"
                     onClick={() => copyToClipboard(htmlSnippet, "html")}
-                    className="px-3 py-1.5 rounded bg-card border border-border text-foreground hover:bg-secondary flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer text-xs font-semibold shadow-2xs"
+                    className="px-3 py-1.5 rounded bg-card border border-border text-foreground hover:bg-secondary flex items-center justify-center gap-1.5 shrink-0 transition-colors cursor-pointer text-xs font-semibold shadow-2xs self-end sm:self-center"
                   >
                     {copiedHtml ? (
                       <>
@@ -200,11 +200,11 @@ export function ReadmeEmbedModal({
             </div>
           ) : (
             /* Tab 2: Hosted Web Badge */
-            <div className="space-y-3 p-4 rounded-lg border border-border bg-secondary/30 text-xs font-mono">
+            <div className="space-y-3 p-4 rounded-lg border border-border bg-secondary/30 text-xs font-mono w-full min-w-0">
               <p className="text-muted-foreground font-sans">
                 Link directly to your live Gitlytics intelligence report using a badge:
               </p>
-              <div className="p-3 rounded bg-card border border-border text-primary break-all">
+              <div className="p-3 rounded bg-card border border-border text-primary break-all whitespace-pre-wrap font-mono">
                 {badgeSnippet}
               </div>
               <button
@@ -228,16 +228,16 @@ export function ReadmeEmbedModal({
           )}
 
           {/* Footer Preview Link */}
-          <div className="pt-2 text-center text-xs font-mono text-muted-foreground">
+          <div className="pt-2 text-center text-xs font-mono text-muted-foreground break-all">
             Preview live profile link:{" "}
             <a
               href={`https://gitlytics.vercel.app/?u=${cleanUser}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline inline-flex items-center gap-1"
+              className="text-primary hover:underline inline-flex items-center gap-1 break-all"
             >
               <span>{`https://gitlytics.vercel.app/?u=${cleanUser}`}</span>
-              <ExternalLink className="h-3 w-3" />
+              <ExternalLink className="h-3 w-3 shrink-0" />
             </a>
           </div>
         </div>
